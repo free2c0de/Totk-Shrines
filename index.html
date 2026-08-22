@@ -311,9 +311,13 @@ th button:focus-visible {
   overflow: hidden;
 }
 
+.table-header-scroll {
+  overflow: hidden;
+}
+
 .table-scroll {
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
   max-height: 68vh;
   -webkit-overflow-scrolling: touch;
   background: var(--surface);
@@ -405,7 +409,7 @@ tbody tr.is-found { opacity: 0.55; }
 
 tbody tr.is-found .shrine-name { text-decoration: line-through; text-decoration-color: var(--accent-2); }
 
-td.num { color: var(--ink-faint); font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; }
+td.num { color: var(--ink-faint); font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; white-space: nowrap; }
 
 .shrine-name { font-weight: 600; color: var(--ink); }
 
@@ -516,6 +520,8 @@ td.num { color: var(--ink-faint); font-family: 'IBM Plex Mono', monospace; font-
 
 .region-pill {
   display: inline-block;
+  max-width: 100%;
+  box-sizing: border-box;
   font-size: 0.76rem;
   font-weight: 500;
   color: var(--accent-2-strong);
@@ -596,7 +602,7 @@ footer.page a { color: var(--accent-2-strong); }
     <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"></path></svg>
     <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"></path></svg>
   </button>
-  <span class="version-tag">08.22.2026 v6</span>
+  <span class="version-tag">08.22.2026 v9</span>
 </div>
 <div class="wrap">
   <header class="page">
@@ -625,18 +631,20 @@ footer.page a { color: var(--accent-2-strong); }
   </div>
 
   <div class="table-frame">
-    <table class="header-table">
-      <thead>
-        <tr>
-          <th data-col="idx"><button data-key="idx" aria-sort="ascending">#<span class="arrow">&#9662;</span></button></th>
-          <th data-col="found"><button data-key="found">Found<span class="arrow">&#9662;</span></button></th>
-          <th data-col="shrine"><button data-key="shrine">Shrine<span class="arrow">&#9662;</span></button></th>
-          <th data-col="region"><button data-key="region">Region<span class="arrow">&#9662;</span></button></th>
-          <th data-col="tower"><button data-key="tower">Skyview Tower<span class="arrow">&#9662;</span></button></th>
-        </tr>
-      </thead>
-    </table>
-    <div class="table-scroll">
+    <div class="table-header-scroll" id="tableHeaderScroll">
+      <table class="header-table">
+        <thead>
+          <tr>
+            <th data-col="idx"><button data-key="idx" aria-sort="ascending">#<span class="arrow">&#9662;</span></button></th>
+            <th data-col="found"><button data-key="found">Found<span class="arrow">&#9662;</span></button></th>
+            <th data-col="shrine"><button data-key="shrine">Shrine<span class="arrow">&#9662;</span></button></th>
+            <th data-col="region"><button data-key="region">Region<span class="arrow">&#9662;</span></button></th>
+            <th data-col="tower"><button data-key="tower">Skyview Tower<span class="arrow">&#9662;</span></button></th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <div class="table-scroll" id="tableScroll">
       <table class="body-table">
         <tbody id="tableBody"></tbody>
       </table>
@@ -914,9 +922,13 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
   }
 
   // The header lives in its own separate <table> from the body (so it never
-  // needs position:sticky), so both tables use table-layout:fixed with these
-  // matching percentage widths to keep their columns pixel-aligned.
-  var COLUMN_WEIGHTS = { idx: 8, found: 14, shrine: 30, region: 22, tower: 26 };
+  // needs position:sticky), so both tables use table-layout:fixed with matching
+  // widths to keep their columns pixel-aligned. Each visible column gets a real
+  // minimum width so content never has to compress below readability; if the
+  // visible set doesn't fit the viewport, the table grows wider and the
+  // container scrolls horizontally instead of squeezing/overlapping content.
+  var COLUMN_ORDER = ['idx', 'found', 'shrine', 'region', 'tower'];
+  var COLUMN_MIN_WIDTH = { idx: 58, found: 64, shrine: 150, region: 195, tower: 190 };
 
   function applyColumnVisibility() {
     var effective = effectiveHiddenCols();
@@ -927,17 +939,27 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
       });
     });
 
-    var visibleKeys = Object.keys(COLUMN_WEIGHTS).filter(function (key) { return !effective[key]; });
-    var totalWeight = visibleKeys.reduce(function (sum, key) { return sum + COLUMN_WEIGHTS[key]; }, 0);
+    var visibleKeys = COLUMN_ORDER.filter(function (key) { return !effective[key]; });
+    var lastKey = visibleKeys[visibleKeys.length - 1];
+    var totalMinWidth = visibleKeys.reduce(function (sum, key) { return sum + COLUMN_MIN_WIDTH[key]; }, 0);
+    var containerWidth = tableScrollEl ? tableScrollEl.clientWidth : 0;
+    var canFlexLast = totalMinWidth < containerWidth;
     visibleKeys.forEach(function (key) {
-      var pct = (COLUMN_WEIGHTS[key] / totalWeight) * 100;
+      var flexThis = canFlexLast && key === lastKey;
       document.querySelectorAll('[data-col="' + key + '"]').forEach(function (el) {
-        el.style.width = pct + '%';
+        el.style.width = flexThis ? '' : COLUMN_MIN_WIDTH[key] + 'px';
+        el.style.minWidth = COLUMN_MIN_WIDTH[key] + 'px';
       });
     });
   }
 
   window.addEventListener('resize', applyColumnVisibility);
+
+  var tableHeaderScroll = document.getElementById('tableHeaderScroll');
+  var tableScrollEl = document.getElementById('tableScroll');
+  tableScrollEl.addEventListener('scroll', function () {
+    tableHeaderScroll.scrollLeft = tableScrollEl.scrollLeft;
+  }, { passive: true });
 
   var columnsDialog = document.getElementById('columnsDialog');
   var columnsList = document.getElementById('columnsList');
