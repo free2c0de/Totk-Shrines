@@ -145,12 +145,6 @@ h1 {
   max-width: 46ch;
 }
 
-.header-right {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
 .theme-toggle {
   display: inline-flex;
   align-items: center;
@@ -444,15 +438,30 @@ footer.page {
 
 footer.page a { color: var(--accent-2-strong); }
 
-.version-tag {
+.corner-tag {
   position: fixed;
   top: 0.5rem;
   right: 0.75rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.version-tag {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.68rem;
   color: var(--ink-faint);
-  z-index: 10;
   pointer-events: none;
+}
+
+.theme-toggle-slot {
+  display: block;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.theme-toggle-slot:empty {
+  display: none;
 }
 
 @media (max-width: 640px) {
@@ -461,24 +470,25 @@ footer.page a { color: var(--accent-2-strong); }
 }
 </style>
 
-<div class="version-tag">Version: 08.22.2026 v1</div>
+<div class="corner-tag">
+  <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" title="Toggle light / dark theme">
+    <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"></path></svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"></path></svg>
+  </button>
+  <span class="version-tag">Version: 08.22.2026 v1</span>
+</div>
 <div class="wrap">
   <header class="page">
     <div class="titleblock">
       <div class="eyebrow">Tears of the Kingdom &middot; Shrine Reference</div>
       <h1>Shrines of Hyrule</h1>
+      <span class="theme-toggle-slot" id="themeToggleSlot"></span>
       <p>Every shrine location gathered from its Skyview Tower, with tower and shrine coordinates for fast-travel.</p>
     </div>
-    <div class="header-right">
-      <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" title="Toggle light / dark theme">
-        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"></path></svg>
-        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"></path></svg>
-      </button>
-      <div class="progress-card">
-        <div class="label">Shrines found</div>
-        <div class="num" id="progressNum">0<span>&nbsp;/ 152</span></div>
-        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-      </div>
+    <div class="progress-card">
+      <div class="label">Shrines found</div>
+      <div class="num" id="progressNum">0<span>&nbsp;/ 152</span></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
     </div>
   </header>
 
@@ -545,6 +555,21 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
   }
 
   applyTheme(getStoredTheme(), false);
+
+  var cornerTag = document.querySelector('.corner-tag');
+  var themeToggleSlot = document.getElementById('themeToggleSlot');
+  var narrowLayout = window.matchMedia('(max-width: 640px)');
+
+  function placeThemeToggle(e) {
+    if (e.matches) {
+      themeToggleSlot.appendChild(themeToggle);
+    } else {
+      cornerTag.insertBefore(themeToggle, cornerTag.firstChild);
+    }
+  }
+
+  placeThemeToggle(narrowLayout);
+  narrowLayout.addEventListener('change', placeThemeToggle);
 
   themeToggle.addEventListener('click', function () {
     var current = root.getAttribute('data-theme') || systemTheme();
