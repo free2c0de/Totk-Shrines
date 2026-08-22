@@ -1,0 +1,787 @@
+<title>Shrines of Hyrule</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #eeebe3;
+  --surface: #fbfaf6;
+  --surface-2: #f2efe6;
+  --ink: #262420;
+  --ink-muted: #6b6558;
+  --ink-faint: #9a9384;
+  --accent: #a8701f;
+  --accent-strong: #8f5c16;
+  --accent-2: #2f6d5f;
+  --accent-2-strong: #245448;
+  --border: #d8d2c2;
+  --border-strong: #c4bda9;
+  --row-alt: #f4f1e8;
+  --focus: #a8701f;
+  --shadow: 0 1px 2px rgba(38,36,32,0.06), 0 4px 16px rgba(38,36,32,0.06);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1b1815;
+    --surface: #242019;
+    --surface-2: #2b261e;
+    --ink: #ede7da;
+    --ink-muted: #a79e8c;
+    --ink-faint: #7d7566;
+    --accent: #e3a73f;
+    --accent-strong: #f2c572;
+    --accent-2: #5fbba3;
+    --accent-2-strong: #7fd0ba;
+    --border: #3a342a;
+    --border-strong: #4a4335;
+    --row-alt: #211d17;
+    --focus: #e3a73f;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #1b1815;
+  --surface: #242019;
+  --surface-2: #2b261e;
+  --ink: #ede7da;
+  --ink-muted: #a79e8c;
+  --ink-faint: #7d7566;
+  --accent: #e3a73f;
+  --accent-strong: #f2c572;
+  --accent-2: #5fbba3;
+  --accent-2-strong: #7fd0ba;
+  --border: #3a342a;
+  --border-strong: #4a4335;
+  --row-alt: #211d17;
+  --focus: #e3a73f;
+  --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Work Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) var(--bg);
+}
+
+body::-webkit-scrollbar {
+  width: 12px;
+}
+
+body::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border-radius: 999px;
+  border: 3px solid var(--bg);
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ink-faint);
+}
+
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 5rem;
+}
+
+header.page {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 3rem;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.titleblock .eyebrow {
+  font-family: 'Work Sans', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+h1 {
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-weight: 600;
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+  margin: 0.2rem 0 0.35rem;
+  color: var(--ink);
+  text-wrap: balance;
+  letter-spacing: 0.01em;
+}
+
+.titleblock p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+  max-width: 46ch;
+}
+
+.header-right {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--ink-muted);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.theme-toggle:hover {
+  color: var(--accent);
+  border-color: var(--border-strong);
+}
+
+.theme-toggle svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-toggle .icon-sun,
+.theme-toggle .icon-moon {
+  display: none;
+}
+
+.theme-toggle[data-effective="dark"] .icon-sun { display: block; }
+.theme-toggle[data-effective="light"] .icon-moon { display: block; }
+
+.progress-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.9rem 1.25rem;
+  min-width: 220px;
+  box-shadow: var(--shadow);
+}
+
+.progress-card .num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.progress-card .num span {
+  font-size: 1rem;
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+
+.progress-card .label {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 0.35rem;
+}
+
+.progress-track {
+  margin-top: 0.6rem;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  width: 0%;
+  transition: width 0.25s ease;
+}
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  background: var(--bg);
+  padding: 0.9rem 0 1rem;
+  margin-bottom: 0.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.toolbar input[type="search"],
+.toolbar select {
+  font-family: 'Work Sans', sans-serif;
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 0.55rem 0.8rem;
+}
+
+.toolbar input[type="search"] {
+  flex: 1 1 240px;
+  min-width: 180px;
+}
+
+.toolbar input[type="search"]:focus,
+.toolbar select:focus,
+button:focus-visible,
+th button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.toolbar select {
+  flex: 0 0 auto;
+}
+
+.toolbar .count {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.toolbar button.reset {
+  font-family: 'Work Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent-2-strong);
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+}
+
+.toolbar button.reset:hover {
+  background: var(--surface-2);
+}
+
+.table-scroll {
+  overflow: auto;
+  max-height: 68vh;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  background: var(--surface);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) var(--surface-2);
+}
+
+.table-scroll::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+.table-scroll::-webkit-scrollbar-track {
+  background: var(--surface-2);
+}
+
+.table-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border-radius: 999px;
+  border: 3px solid var(--surface-2);
+}
+
+.table-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ink-faint);
+}
+
+.table-scroll::-webkit-scrollbar-corner {
+  background: var(--surface-2);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 880px;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface-2);
+  text-align: left;
+  font-family: 'Work Sans', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--border-strong);
+  white-space: nowrap;
+}
+
+thead th button {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+thead th button .arrow {
+  opacity: 0.35;
+  font-size: 0.7em;
+}
+
+thead th button[aria-sort="ascending"] .arrow,
+thead th button[aria-sort="descending"] .arrow {
+  opacity: 1;
+  color: var(--accent);
+}
+
+tbody td {
+  padding: 0.62rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+
+tbody tr:nth-child(even) { background: var(--row-alt); }
+
+tbody tr.is-found { opacity: 0.55; }
+
+tbody tr.is-found .shrine-name { text-decoration: line-through; text-decoration-color: var(--accent-2); }
+
+td.num { color: var(--ink-faint); font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; }
+
+td.coords, .coords { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; font-size: 0.82rem; color: var(--ink-muted); white-space: nowrap; }
+
+.shrine-name { font-weight: 600; color: var(--ink); }
+
+.region-pill {
+  display: inline-block;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--accent-2-strong);
+  background: color-mix(in srgb, var(--accent-2) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-2) 30%, transparent);
+  border-radius: 999px;
+  padding: 0.18rem 0.6rem;
+  white-space: nowrap;
+}
+
+.tower-name { color: var(--ink-muted); font-size: 0.86rem; }
+
+.found-cell { text-align: center; }
+
+.found-check {
+  width: 19px;
+  height: 19px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.empty-state {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+}
+
+footer.page {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.5rem;
+}
+
+footer.page a { color: var(--accent-2-strong); }
+
+@media (max-width: 640px) {
+  .toolbar { position: static; }
+  .table-scroll { max-height: 72vh; }
+}
+</style>
+
+<div class="wrap">
+  <header class="page">
+    <div class="titleblock">
+      <div class="eyebrow">Tears of the Kingdom &middot; Shrine Reference</div>
+      <h1>Shrines of Hyrule</h1>
+      <p>Every shrine location gathered from its Skyview Tower, with tower and shrine coordinates for fast-travel.</p>
+    </div>
+    <div class="header-right">
+      <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" title="Toggle light / dark theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"></path></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"></path></svg>
+      </button>
+      <div class="progress-card">
+        <div class="label">Shrines found</div>
+        <div class="num" id="progressNum">0<span>&nbsp;/ 152</span></div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <input type="search" id="searchInput" placeholder="Search shrine, tower, or region&hellip;" aria-label="Search shrines">
+    <select id="regionFilter" aria-label="Filter by region"><option value="">All regions</option></select>
+    <button type="button" class="reset" id="saveBtn" title="Saves a copy of this file with your checkmarks baked in, so they don't depend on browser storage. Lets you choose the folder if your browser supports it, otherwise downloads to your default downloads location.">Save progress to file</button>
+    <button type="button" class="reset" id="resetBtn">Reset tracker</button>
+    <span class="count" id="resultCount"></span>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:3.5rem;"><button data-key="idx" aria-sort="ascending">#<span class="arrow">&#9662;</span></button></th>
+          <th><button data-key="region">Region<span class="arrow">&#9662;</span></button></th>
+          <th><button data-key="tower">Skyview Tower<span class="arrow">&#9662;</span></button></th>
+          <th>Tower Coords</th>
+          <th><button data-key="shrine">Shrine<span class="arrow">&#9662;</span></button></th>
+          <th>Shrine Coords</th>
+          <th style="width:4.5rem;"><button data-key="found">Found<span class="arrow">&#9662;</span></button></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div class="empty-state" id="emptyState" hidden>No shrines match your search.</div>
+  </div>
+
+  <footer class="page">
+    <span>152 shrines compiled from the source spreadsheet.</span>
+    <span>Checkmarks are remembered automatically in this browser; click &ldquo;Save progress to file&rdquo; to bake them permanently into a downloaded copy of this page.</span>
+  </footer>
+</div>
+
+<script id="shrine-data">
+var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower", "tower_xyz": "3497, 2025, 0188", "shrine": "Gemimik", "shrine_xyz": "4513, 2116, 0001", "found": false}, {"region": "Pikida Stonegrove", "tower": "Pikida Stonegrove Skyview Tower", "tower_xyz": "-2312, 3064, 0536", "shrine": "Nouda", "shrine_xyz": "-2321, 2192, 0177", "found": false}, {"region": "Eldin", "tower": "Eldin Canyon Skyview Tower", "tower_xyz": "1641, 1190, 0225", "shrine": "Kimayat", "shrine_xyz": "2863, 3637, 0241", "found": false}, {"region": "Akkala", "tower": "Ulri Mountain Skyview Tower", "tower_xyz": "3497, 2025, 0188", "shrine": "Domizuin", "shrine_xyz": "3305, 1443, 0426", "found": false}, {"region": "Pikida Stonegrove", "tower": "Pikida Stonegrove Skyview Tower", "tower_xyz": "-2312, 3064, 0536", "shrine": "Orochium", "shrine_xyz": "-1641, 2645, 0239", "found": false}, {"region": "Eldin", "tower": "Eldin Canyon Skyview Tower", "tower_xyz": "1641, 1190, 0225", "shrine": "Sibajitak", "shrine_xyz": "2399, 3274, 0402", "found": false}, {"region": "Akkala", "tower": "Ulri Mountain Skyview Tower", "tower_xyz": "3497, 2025, 0188", "shrine": "Sinatanika", "shrine_xyz": "3848, 2295, 0047", "found": false}, {"region": "Pikida Stonegrove", "tower": "Pikida Stonegrove Skyview Tower", "tower_xyz": "-2312, 3064, 0536", "shrine": "Oshozan-u", "shrine_xyz": "-1404, 3677, 0288", "found": false}, {"region": "Eldin", "tower": "Eldin Canyon Skyview Tower", "tower_xyz": "1641, 1190, 0225", "shrine": "Jiotak", "shrine_xyz": "1833, 3179, 0257", "found": false}, {"region": "Akkala", "tower": "Ulri Mountain Skyview Tower", "tower_xyz": "3497, 2025, 0188", "shrine": "Mayachideg", "shrine_xyz": "3061, 1823, 0216", "found": false}, {"region": "Pikida Stonegrove", "tower": "Pikida Stonegrove Skyview Tower", "tower_xyz": "-2312, 3064, 0536", "shrine": "Mayaotaki", "shrine_xyz": "-0823, 3535, 0235", "found": false}, {"region": "Eldin", "tower": "Eldin Canyon Skyview Tower", "tower_xyz": "1641, 1190, 0225", "shrine": "Isisim", "shrine_xyz": "1838, 2837, 0363", "found": false}, {"region": "Akkala", "tower": "Ulri Mountain Skyview Tower", "tower_xyz": "3497, 2025, 0188", "shrine": "Jochi-iu", "shrine_xyz": "4346, 2875, 0165", "found": false}, {"region": "Pikida Stonegrove", "tower": "Pikida Stonegrove Skyview Tower", "tower_xyz": "-2312, 3064, 0536", "shrine": "Mayausiy", "shrine_xyz": "-1165, 2602, -0083", "found": false}, {"region": "Eldin", "tower": "Eldin Canyon Skyview Tower", "tower_xyz": "1641, 1190, 0225", "shrine": "Marakuguc", "shrine_xyz": "1761, 2508, 0473", "found": false}, {"region": "Akkala", "tower": "Ulri Mountain Skyview Tower", "tower_xyz": "3497, 2025, 0188", "shrine": "Kamatukis", "shrine_xyz": "3431, 3357, 0190", "found": false}, {"region": "Pikida Stonegrove Sky", "tower": "Pikida Stonegrove Skyview Tower", "tower_xyz": "-2312, 3064, 0536", "shrine": "Taninoud", "shrine_xyz": "-1801, 3406, 0949", "found": false}, {"region": "Eldin", "tower": "Eldin Canyon Skyview Tower", "tower_xyz": "1641, 1190, 0225", "shrine": "Sitsum", "shrine_xyz": "2369, 2595, 0790", "found": false}, {"region": "Akkala", "tower": "Ulri Mountain Skyview Tower", "tower_xyz": "3497, 2025, 0188", "shrine": "Rasiwak", "shrine_xyz": "4664, 3263, 0121", "found": false}, {"region": "Pikida Stonegrove Sky", "tower": "Pikida Stonegrove Skyview Tower", "tower_xyz": "-2312, 3064, 0536", "shrine": "Tenbez", "shrine_xyz": "-0968, 3535, 1011", "found": false}, {"region": "Eldin", "tower": "Eldin Canyon Skyview Tower", "tower_xyz": "1641, 1190, 0225", "shrine": "Momosik", "shrine_xyz": "2959, 2758, 0524", "found": false}, {"region": "Akkala", "tower": "Ulri Mountain Skyview Tower", "tower_xyz": "3497, 2025, 0188", "shrine": "Igashuk", "shrine_xyz": "4664, 3686, 0129", "found": false}, {"region": "Upland Zorana", "tower": "Upland Zorana Skyview Tower", "tower_xyz": "2865, 0580, 0379", "shrine": "Jochi-ihiga", "shrine_xyz": "3809, 1219, 0090", "found": false}, {"region": "Eldin", "tower": "Eldin Canyon Skyview Tower", "tower_xyz": "1641, 1190, 0225", "shrine": "Ekochiu", "shrine_xyz": "1062, 1281, 0045", "found": false}, {"region": "Akkala Sky", "tower": "Ulri Mountain Skyview Tower", "tower_xyz": "3497, 2025, 0188", "shrine": "Natak", "shrine_xyz": "3669, 1488, 1157", "found": false}, {"region": "Upland Zorana", "tower": "Upland Zorana Skyview Tower", "tower_xyz": "2865, 0580, 0379", "shrine": "Rasitakiwak", "shrine_xyz": "4161, 1324, 0229", "found": false}, {"region": "Eldin", "tower": "Eldin Canyon Skyview Tower", "tower_xyz": "1641, 1190, 0225", "shrine": "Timawak", "shrine_xyz": "1799, 1638, 0311", "found": false}, {"region": "Akkala Sky", "tower": "Ulri Mountain Skyview Tower", "tower_xyz": "3497, 2025, 0188", "shrine": "Gikaku", "shrine_xyz": "4506, 2165, 1155", "found": false}, {"region": "Upland Zorana", "tower": "Upland Zorana Skyview Tower", "tower_xyz": "2865, 0580, 0379", "shrine": "Maoikes", "shrine_xyz": "2275, 0147, 0079", "found": false}, {"region": "Eldin", "tower": "Eldin Canyon Skyview Tower", "tower_xyz": "1641, 1190, 0225", "shrine": "Moshapin", "shrine_xyz": "2678, 1905, 0131", "found": false}, {"region": "Akkala Sky", "tower": "Ulri Mountain Skyview Tower", "tower_xyz": "3497, 2025, 0188", "shrine": "Mogisari", "shrine_xyz": "4655, 3501, 1010", "found": false}, {"region": "Upland Zorana", "tower": "Upland Zorana Skyview Tower", "tower_xyz": "2865, 0580, 0379", "shrine": "Yomizuk", "shrine_xyz": "4412, -0610, 0034", "found": false}, {"region": "Eldin", "tower": "Eldin Canyon Skyview Tower", "tower_xyz": "1641, 1190, 0225", "shrine": "Kisinona", "shrine_xyz": "2567, 1246, 0173", "found": false}, {"region": "Lookout Landing", "tower": "Lookout Landing Skyview Tower", "tower_xyz": "-0298, 0142, 0025", "shrine": "Susuyai", "shrine_xyz": "-0785, -0434, 0018", "found": false}, {"region": "Upland Zorana", "tower": "Upland Zorana Skyview Tower", "tower_xyz": "2865, 0580, 0379", "shrine": "Apogek", "shrine_xyz": "3887, -0217, 0164", "found": false}, {"region": "Eldin Sky", "tower": "Eldin Canyon Skyview Tower", "tower_xyz": "1641, 1190, 0225", "shrine": "Kadaunar", "shrine_xyz": "1881, 1203, 1251", "found": false}, {"region": "Lookout Landing", "tower": "Lookout Landing Skyview Tower", "tower_xyz": "-0298, 0142, 0025", "shrine": "Jiosin", "shrine_xyz": "-3983, -1084, 0624", "found": false}, {"region": "Upland Zorana", "tower": "Upland Zorana Skyview Tower", "tower_xyz": "2865, 0580, 0379", "shrine": "Joniu", "shrine_xyz": "2918, 0505, 0155", "found": false}, {"region": "Great Hyrule Forest", "tower": "Thyphlo Ruins Skyview Tower", "tower_xyz": "0343, 3133, 0180", "shrine": "Tenmaten", "shrine_xyz": "-0593, 1551, -0014", "found": false}, {"region": "Lookout Landing", "tower": "Lookout Landing Skyview Tower", "tower_xyz": "-0298, 0142, 0025", "shrine": "Yamiyo", "shrine_xyz": "0332, 0470, 0029", "found": false}, {"region": "Upland Zorana", "tower": "Upland Zorana Skyview Tower", "tower_xyz": "2865, 0580, 0379", "shrine": "Mogawak", "shrine_xyz": "3298, 0424, 0112", "found": false}, {"region": "Great Hyrule Forest", "tower": "Thyphlo Ruins Skyview Tower", "tower_xyz": "0343, 3133, 0180", "shrine": "Ninjis", "shrine_xyz": "0353, 1891, 0178", "found": false}, {"region": "Lookout Landing", "tower": "Lookout Landing Skyview Tower", "tower_xyz": "-0298, 0142, 0025", "shrine": "Kyononis", "shrine_xyz": "-0205, 0451, 0021", "found": false}, {"region": "Upland Zorana", "tower": "Upland Zorana Skyview Tower", "tower_xyz": "2865, 0580, 0379", "shrine": "Ihen-a", "shrine_xyz": "3787, 0577, 0486", "found": false}, {"region": "Great Hyrule Forest", "tower": "Thyphlo Ruins Skyview Tower", "tower_xyz": "0343, 3133, 0180", "shrine": "Pupunke", "shrine_xyz": "0615, 2213, 0163", "found": false}, {"region": "Lookout Landing", "tower": "Lookout Landing Skyview Tower", "tower_xyz": "-0298, 0142, 0025", "shrine": "Ishodag", "shrine_xyz": "-0880, 0422, 0049", "found": false}, {"region": "Upland Zorana", "tower": "Upland Zorana Skyview Tower", "tower_xyz": "2865, 0580, 0379", "shrine": "Gatanisis", "shrine_xyz": "4498, 0825, 0095", "found": false}, {"region": "Great Hyrule Forest", "tower": "Thyphlo Ruins Skyview Tower", "tower_xyz": "0343, 3133, 0180", "shrine": "Musanokir", "shrine_xyz": "0408, 2133, 0144", "found": false}, {"region": "Lookout Landing", "tower": "Lookout Landing Skyview Tower", "tower_xyz": "-0298, 0142, 0025", "shrine": "Serutabomac", "shrine_xyz": "-0179, 1170, 0280", "found": false}, {"region": "Upland Zorana Sky", "tower": "Upland Zorana Skyview Tower", "tower_xyz": "2865, 0580, 0379", "shrine": "Jirutagumac", "shrine_xyz": "2917, 0532, 0951", "found": false}, {"region": "Great Hyrule Forest", "tower": "Thyphlo Ruins Skyview Tower", "tower_xyz": "0343, 3133, 0180", "shrine": "Sakunbomar", "shrine_xyz": "0165, 2314, 0178", "found": false}, {"region": "Lookout Landing", "tower": "Lookout Landing Skyview Tower", "tower_xyz": "-0298, 0142, 0025", "shrine": "Sepapa", "shrine_xyz": "0220, 1083, 0028", "found": false}, {"region": "Upland Zorana Sky", "tower": "Upland Zorana Skyview Tower", "tower_xyz": "2865, 0580, 0379", "shrine": "Igoshon", "shrine_xyz": "3482, 0667, 1325", "found": false}, {"region": "Great Hyrule Forest", "tower": "Thyphlo Ruins Skyview Tower", "tower_xyz": "0343, 3133, 0180", "shrine": "Kikakin", "shrine_xyz": "-0395, 2736, 0287", "found": false}, {"region": "Hyrule Field", "tower": "Hyrule Field Landing Tower", "tower_xyz": "-0761, -1019, 0064", "shrine": "Tadarok", "shrine_xyz": "-1079, -2185, 0129", "found": false}, {"region": "Mount Lanayru", "tower": "Mount Lanayru Skyview Tower", "tower_xyz": "3847, -1313, 0539", "shrine": "Zanmik", "shrine_xyz": "3469, -2179, 0148", "found": false}, {"region": "Great Hyrule Forest", "tower": "Thyphlo Ruins Skyview Tower", "tower_xyz": "0343, 3133, 0180", "shrine": "Sikukuu", "shrine_xyz": "0699, 2793, 0226", "found": false}, {"region": "Hyrule Field", "tower": "Hyrule Field Landing Tower", "tower_xyz": "-0761, -1019, 0064", "shrine": "Riogok", "shrine_xyz": "-1440, -1616, 0089", "found": false}, {"region": "Mount Lanayru", "tower": "Mount Lanayru Skyview Tower", "tower_xyz": "3847, -1313, 0539", "shrine": "Mayahisik", "shrine_xyz": "3730, -2058, 0189", "found": false}, {"region": "Great Hyrule Forest", "tower": "Thyphlo Ruins Skyview Tower", "tower_xyz": "0343, 3133, 0180", "shrine": "Minetak", "shrine_xyz": "0393, 3485, 0068", "found": false}, {"region": "Hyrule Field", "tower": "Hyrule Field Landing Tower", "tower_xyz": "-0761, -1019, 0064", "shrine": "Tsutsu-um", "shrine_xyz": "-1423, -1349, 0068", "found": false}, {"region": "Mount Lanayru", "tower": "Mount Lanayru Skyview Tower", "tower_xyz": "3847, -1313, 0539", "shrine": "Anedamimik", "shrine_xyz": "4231, -2178, -0012", "found": false}, {"region": "Great Hyrule Forest", "tower": "Thyphlo Ruins Skyview Tower", "tower_xyz": "0343, 3133, 0180", "shrine": "Mayak", "shrine_xyz": "1270, 3733, 0106", "found": false}, {"region": "Hyrule Field", "tower": "Hyrule Field Landing Tower", "tower_xyz": "-0761, -1019, 0064", "shrine": "Usazum", "shrine_xyz": "-2138, 0874, 0093", "found": false}, {"region": "Mount Lanayru", "tower": "Mount Lanayru Skyview Tower", "tower_xyz": "3847, -1313, 0539", "shrine": "Zakusu", "shrine_xyz": "3527, -1482, 0168", "found": false}, {"region": "Great Hyrule Forest Sky", "tower": "Thyphlo Ruins Skyview Tower", "tower_xyz": "0343, 3133, 0180", "shrine": "Simosiwak", "shrine_xyz": "0163, 1972, 0759", "found": false}, {"region": "Hyrule Field", "tower": "Hyrule Field Landing Tower", "tower_xyz": "-0761, -1019, 0064", "shrine": "Sonapan", "shrine_xyz": "-1921, -0361, 0228", "found": false}, {"region": "Mount Lanayru", "tower": "Mount Lanayru Skyview Tower", "tower_xyz": "3847, -1313, 0539", "shrine": "Jikais", "shrine_xyz": "4266, -1674, 0182", "found": false}, {"region": "Great Hyrule Forest Sky", "tower": "Thyphlo Ruins Skyview Tower", "tower_xyz": "0343, 3133, 0180", "shrine": "Mayam", "shrine_xyz": "0340, 2815, 1821", "found": false}, {"region": "Hyrule Field", "tower": "Hyrule Field Landing Tower", "tower_xyz": "-0761, -1019, 0064", "shrine": "Mayachin", "shrine_xyz": "0705, -0865, 0038", "found": false}, {"region": "Mount Lanayru", "tower": "Mount Lanayru Skyview Tower", "tower_xyz": "3847, -1313, 0539", "shrine": "Jogou", "shrine_xyz": "3346, -1187, 0057", "found": false}, {"region": "Gerudo Highlands", "tower": "Gerudo Highlands Skyview Tower", "tower_xyz": "-3959, -1313, 0422", "shrine": "Gasas", "shrine_xyz": "-3079, 1617, 0243", "found": false}, {"region": "Hyrule Field", "tower": "Hyrule Field Landing Tower", "tower_xyz": "-0761, -1019, 0064", "shrine": "Teniten", "shrine_xyz": "-0073, -1115, 0021", "found": false}, {"region": "Mount Lanayru Sky", "tower": "Mount Lanayru Skyview Tower", "tower_xyz": "3847, -1313, 0539", "shrine": "Sihajog", "shrine_xyz": "4548, -0846, 1120", "found": false}, {"region": "Gerudo Highlands", "tower": "Gerudo Highlands Skyview Tower", "tower_xyz": "-3959, -1313, 0422", "shrine": "Turakawak", "shrine_xyz": "-3496, -0197, 0066", "found": false}, {"region": "Hyrule Field", "tower": "Hyrule Field Landing Tower", "tower_xyz": "-0761, -1019, 0064", "shrine": "Tajikats", "shrine_xyz": "0352, -0999, 0016", "found": false}, {"region": "Mount Lanayru Sky", "tower": "Mount Lanayru Skyview Tower", "tower_xyz": "3847, -1313, 0539", "shrine": "Mayanas", "shrine_xyz": "4613, -0947, 1790", "found": false}, {"region": "Gerudo Highlands", "tower": "Gerudo Highlands Skyview Tower", "tower_xyz": "-3959, -1313, 0422", "shrine": "Otutsum", "shrine_xyz": "-4468, -0670, 0509", "found": false}, {"region": "Hyrule Field", "tower": "Hyrule Field Landing Tower", "tower_xyz": "-0761, -1019, 0064", "shrine": "Kamizun", "shrine_xyz": "-0177, -1557, 0023", "found": false}, {"region": "Sahasra Slope", "tower": "Sahasra Slope Skyview Tower", "tower_xyz": "1341, -1176, 0166", "shrine": "Ren-iz", "shrine_xyz": "0756, 0823, 0082", "found": false}, {"region": "Gerudo Highlands", "tower": "Gerudo Highlands Skyview Tower", "tower_xyz": "-3959, -1313, 0422", "shrine": "Mayamats", "shrine_xyz": "-4639, -1510, 0452", "found": false}, {"region": "Hyrule Field", "tower": "Hyrule Field Landing Tower", "tower_xyz": "-0761, -1019, 0064", "shrine": "Kyokugon", "shrine_xyz": "-0706, -1551, 0006", "found": false}, {"region": "Sahasra Slope", "tower": "Sahasra Slope Skyview Tower", "tower_xyz": "1341, -1176, 0166", "shrine": "Jojon", "shrine_xyz": "1205, 0315, 0028", "found": false}, {"region": "Gerudo Highlands", "tower": "Gerudo Highlands Skyview Tower", "tower_xyz": "-3959, -1313, 0422", "shrine": "Rotsumamu", "shrine_xyz": "-3405, -1365, 0335", "found": false}, {"region": "Hyrule Field Sky", "tower": "Hyrule Field Landing Tower", "tower_xyz": "-0761, -1019, 0064", "shrine": "Jinodok", "shrine_xyz": "-1257, -1487, 1008", "found": false}, {"region": "Sahasra Slope", "tower": "Sahasra Slope Skyview Tower", "tower_xyz": "1341, -1176, 0166", "shrine": "Tukarok", "shrine_xyz": "0915, -0250, -0034", "found": false}, {"region": "Gerudo Highlands", "tower": "Gerudo Highlands Skyview Tower", "tower_xyz": "-3959, -1313, 0422", "shrine": "Suariwak", "shrine_xyz": "-2323, -1770, 0131", "found": false}, {"region": "Lindor's Brow", "tower": "Lindor's Brow Skyview Tower", "tower_xyz": "-1909, 1245, 0297", "shrine": "Kioyoyou", "shrine_xyz": "-1105, 2086, 0104", "found": false}, {"region": "Sahasra Slope", "tower": "Sahasra Slope Skyview Tower", "tower_xyz": "1341, -1176, 0166", "shrine": "Jonsau", "shrine_xyz": "1744, 0017, 0025", "found": false}, {"region": "Gerudo Highlands Sky", "tower": "Gerudo Highlands Skyview Tower", "tower_xyz": "-3959, -1313, 0422", "shrine": "Mayasiar", "shrine_xyz": "-3541, -0322, 1964", "found": false}, {"region": "Lindor's Brow", "tower": "Lindor's Brow Skyview Tower", "tower_xyz": "-1909, 1245, 0297", "shrine": "Oromuwak", "shrine_xyz": "-3079, 1617, 0243", "found": false}, {"region": "Sahasra Slope", "tower": "Sahasra Slope Skyview Tower", "tower_xyz": "1341, -1176, 0166", "shrine": "Morok", "shrine_xyz": "1178, -0781, 0133", "found": false}, {"region": "Gerudo Canyon", "tower": "Gerudo Canyon Skyview Tower", "tower_xyz": "-2438, -2182, 0307", "shrine": "Kitawak", "shrine_xyz": "-1529, -2928, 0321", "found": false}, {"region": "Lindor's Brow", "tower": "Lindor's Brow Skyview Tower", "tower_xyz": "-1909, 1245, 0297", "shrine": "Ikatak", "shrine_xyz": "-3950, 1138, 0112", "found": false}, {"region": "Sahasra Slope", "tower": "Sahasra Slope Skyview Tower", "tower_xyz": "1341, -1176, 0166", "shrine": "Kurakat", "shrine_xyz": "2362, -0511, 0156", "found": false}, {"region": "Gerudo Canyon", "tower": "Gerudo Canyon Skyview Tower", "tower_xyz": "-2438, -2182, 0307", "shrine": "Motsusis", "shrine_xyz": "-1795, -3485, 0045", "found": false}, {"region": "Lindor's Brow", "tower": "Lindor's Brow Skyview Tower", "tower_xyz": "-1909, 1245, 0297", "shrine": "Iun-orok", "shrine_xyz": "-3538, 0853, -0133", "found": false}, {"region": "Sahasra Slope", "tower": "Sahasra Slope Skyview Tower", "tower_xyz": "1341, -1176, 0166", "shrine": "Makasura", "shrine_xyz": "1775, -1055, 0166", "found": false}, {"region": "Gerudo Canyon", "tower": "Gerudo Canyon Skyview Tower", "tower_xyz": "-2438, -2182, 0307", "shrine": "Siwakama", "shrine_xyz": "-2445, -3345, 0041", "found": false}, {"region": "Lindor's Brow", "tower": "Lindor's Brow Skyview Tower", "tower_xyz": "-1909, 1245, 0297", "shrine": "Makurukis", "shrine_xyz": "-2847, 0629, 0233", "found": false}, {"region": "Sahasra Slope", "tower": "Sahasra Slope Skyview Tower", "tower_xyz": "1341, -1176, 0166", "shrine": "Eshos", "shrine_xyz": "1566, -1945, 0157", "found": false}, {"region": "Gerudo Canyon", "tower": "Gerudo Canyon Skyview Tower", "tower_xyz": "-2438, -2182, 0307", "shrine": "Karahatag", "shrine_xyz": "-3726, -3625, 0043", "found": false}, {"region": "Lindor's Brow", "tower": "Lindor's Brow Skyview Tower", "tower_xyz": "-1909, 1245, 0297", "shrine": "Runakit", "shrine_xyz": "-2527, 1169, 0177", "found": false}, {"region": "Sahasra Slope", "tower": "Sahasra Slope Skyview Tower", "tower_xyz": "1341, -1176, 0166", "shrine": "O-ogim", "shrine_xyz": "2755, -1090, 0100", "found": false}, {"region": "Gerudo Canyon", "tower": "Gerudo Canyon Skyview Tower", "tower_xyz": "-2438, -2182, 0307", "shrine": "Irasak", "shrine_xyz": "-4159, -3824, 0028", "found": false}, {"region": "Lindor's Brow", "tower": "Lindor's Brow Skyview Tower", "tower_xyz": "-1909, 1245, 0297", "shrine": "Taki-ihaban", "shrine_xyz": "-1830, 1193, 0147", "found": false}, {"region": "Sahasra Slope Sky", "tower": "Sahasra Slope Skyview Tower", "tower_xyz": "1341, -1176, 0166", "shrine": "Ukoojisi", "shrine_xyz": "1464, -2165, 0585", "found": false}, {"region": "Gerudo Canyon", "tower": "Gerudo Canyon Skyview Tower", "tower_xyz": "-2438, -2182, 0307", "shrine": "Miryotanog", "shrine_xyz": "-4679, -3087, 0054", "found": false}, {"region": "Lindor's Brow", "tower": "Lindor's Brow Skyview Tower", "tower_xyz": "-1909, 1245, 0297", "shrine": "Sinakawak", "shrine_xyz": "-1413, 0757, 0089", "found": false}, {"region": "Sahasra Slope Sky", "tower": "Sahasra Slope Skyview Tower", "tower_xyz": "1341, -1176, 0166", "shrine": "Josiu", "shrine_xyz": "1759, -1209, 0924", "found": false}, {"region": "Gerudo Canyon", "tower": "Gerudo Canyon Skyview Tower", "tower_xyz": "-2438, -2182, 0307", "shrine": "Soryotanog", "shrine_xyz": "-3884, -2964, 0123", "found": false}, {"region": "Lindor's Brow Sky", "tower": "Lindor's Brow Skyview Tower", "tower_xyz": "-1909, 1245, 0297", "shrine": "Taunhiy", "shrine_xyz": "-2400, 0824, 0615", "found": false}, {"region": "Sahasra Slope Sky", "tower": "Sahasra Slope Skyview Tower", "tower_xyz": "1341, -1176, 0166", "shrine": "Yansamin", "shrine_xyz": "2353, -1783, 1475", "found": false}, {"region": "Gerudo Canyon", "tower": "Gerudo Canyon Skyview Tower", "tower_xyz": "-2438, -2182, 0307", "shrine": "Chichim", "shrine_xyz": "-3211, -3007, -0049", "found": false}, {"region": "Lindor's Brow Sky", "tower": "Lindor's Brow Skyview Tower", "tower_xyz": "-1909, 1245, 0297", "shrine": "Ga-ahisas", "shrine_xyz": "-3596, 0962, 1699", "found": false}, {"region": "Rabella Wetlands", "tower": "Rabella Wetlands Skyview Tower", "tower_xyz": "2419, -2755, 0222", "shrine": "Marari-in", "shrine_xyz": "4632, -3712, 0018", "found": false}, {"region": "Gerudo Canyon", "tower": "Gerudo Canyon Skyview Tower", "tower_xyz": "-2438, -2182, 0307", "shrine": "Rakakudaj", "shrine_xyz": "-2037, -1851, 0064", "found": false}, {"region": "Lindor's Brow Sky", "tower": "Lindor's Brow Skyview Tower", "tower_xyz": "-1909, 1245, 0297", "shrine": "Ganos", "shrine_xyz": "-3369, 0467, 1695", "found": false}, {"region": "Rabella Wetlands", "tower": "Rabella Wetlands Skyview Tower", "tower_xyz": "2419, -2755, 0222", "shrine": "Bamitok", "shrine_xyz": "3094, -3209, 0082", "found": false}, {"region": "Gerudo Canyon", "tower": "Gerudo Canyon Skyview Tower", "tower_xyz": "-2438, -2182, 0307", "shrine": "Turakamik", "shrine_xyz": "-2658, -2236, 0067", "found": false}, {"region": "Rospro Pass", "tower": "Rospro Pass Skyview Tower", "tower_xyz": "-3679, 2346, 0233", "shrine": "Otak", "shrine_xyz": "-4391, 3714, 0212", "found": false}, {"region": "Rabella Wetlands", "tower": "Rabella Wetlands Skyview Tower", "tower_xyz": "2419, -2755, 0222", "shrine": "Sifumim", "shrine_xyz": "2826, -3271, 0078", "found": false}, {"region": "Gerudo Canyon", "tower": "Gerudo Canyon Skyview Tower", "tower_xyz": "-2438, -2182, 0307", "shrine": "Mayatat", "shrine_xyz": "-3290, -2512, 0024", "found": false}, {"region": "Rospro Pass", "tower": "Rospro Pass Skyview Tower", "tower_xyz": "-3679, 2346, 0233", "shrine": "Tauyosipun", "shrine_xyz": "-4535, 2878, 0262", "found": false}, {"region": "Rabella Wetlands", "tower": "Rabella Wetlands Skyview Tower", "tower_xyz": "2419, -2755, 0222", "shrine": "Tokiy", "shrine_xyz": "2304, -2377, -0028", "found": false}, {"region": "Gerudo Canyon", "tower": "Gerudo Canyon Skyview Tower", "tower_xyz": "-2438, -2182, 0307", "shrine": "Kudanisar", "shrine_xyz": "-4168, -2140, 0050", "found": false}, {"region": "Rospro Pass", "tower": "Rospro Pass Skyview Tower", "tower_xyz": "-3679, 2346, 0233", "shrine": "Eutoum", "shrine_xyz": "-3509, 3568, 0387", "found": false}, {"region": "Rabella Wetlands Sky", "tower": "Rabella Wetlands Skyview Tower", "tower_xyz": "2419, -2755, 0222", "shrine": "Kumamayn", "shrine_xyz": "2856, -2857, 1212", "found": false}, {"region": "Gerudo Canyon Sky", "tower": "Gerudo Canyon Skyview Tower", "tower_xyz": "-2438, -2182, 0307", "shrine": "Rakashog", "shrine_xyz": "-1713, -2120, 1149", "found": false}, {"region": "Rospro Pass", "tower": "Rospro Pass Skyview Tower", "tower_xyz": "-3679, 2346, 0233", "shrine": "Rutafu-um", "shrine_xyz": "-2996, 3102, 0515", "found": false}, {"region": "Popla Foothills", "tower": "Popla Foothills Skyview Tower", "tower_xyz": "0604, -2127, 0098", "shrine": "Jochisiu", "shrine_xyz": "0931, -1902, 0030", "found": false}, {"region": "Gerudo Canyon Sky", "tower": "Gerudo Canyon Skyview Tower", "tower_xyz": "-2438, -2182, 0307", "shrine": "Siyamotsus", "shrine_xyz": "-1794, -3297, 1011", "found": false}, {"region": "Rospro Pass", "tower": "Rospro Pass Skyview Tower", "tower_xyz": "-3679, 2346, 0233", "shrine": "Sisuram", "shrine_xyz": "-2560, 3353, 0425", "found": false}, {"region": "Popla Foothills", "tower": "Popla Foothills Skyview Tower", "tower_xyz": "0604, -2127, 0098", "shrine": "Susub", "shrine_xyz": "0348, -2050, -0026", "found": false}, {"region": "Sky Islands", "tower": "N/A", "tower_xyz": "N/A", "shrine": "Ukouh", "shrine_xyz": "0274, -0914, 1460", "found": false}, {"region": "Rospro Pass", "tower": "Rospro Pass Skyview Tower", "tower_xyz": "-3679, 2346, 0233", "shrine": "Sahirow", "shrine_xyz": "-3354, 2387, 0361", "found": false}, {"region": "Popla Foothills", "tower": "Popla Foothills Skyview Tower", "tower_xyz": "0604, -2127, 0098", "shrine": "Jiukoum", "shrine_xyz": "0866, -2274, 0141", "found": false}, {"region": "Sky Islands", "tower": "N/A", "tower_xyz": "N/A", "shrine": "In-isa", "shrine_xyz": "0024, -1503, 1408", "found": false}, {"region": "Rospro Pass", "tower": "Rospro Pass Skyview Tower", "tower_xyz": "-3679, 2346, 0233", "shrine": "Wao-os", "shrine_xyz": "-4059, 1990, 0183", "found": false}, {"region": "Popla Foothills", "tower": "Popla Foothills Skyview Tower", "tower_xyz": "0604, -2127, 0098", "shrine": "Utojis", "shrine_xyz": "1217, -2542, 0096", "found": false}, {"region": "Sky Islands", "tower": "N/A", "tower_xyz": "N/A", "shrine": "Gutanbac", "shrine_xyz": "0709, -1383, 1584", "found": false}, {"region": "Rospro Pass", "tower": "Rospro Pass Skyview Tower", "tower_xyz": "-3679, 2346, 0233", "shrine": "Gatakis", "shrine_xyz": "-3651, 1805, 0168", "found": false}, {"region": "Popla Foothills", "tower": "Popla Foothills Skyview Tower", "tower_xyz": "0604, -2127, 0098", "shrine": "Joju-u-u", "shrine_xyz": "1516, -3576, 0142", "found": false}, {"region": "Sky Islands", "tower": "N/A", "tower_xyz": "N/A", "shrine": "Nachoyah", "shrine_xyz": "0389, -1661, 2299", "found": false}, {"region": "Rospro Pass Sky", "tower": "Rospro Pass Skyview Tower", "tower_xyz": "-3679, 2346, 0233", "shrine": "Ijo-o", "shrine_xyz": "-3862, 2679, 0702", "found": false}, {"region": "Popla Foothills", "tower": "Popla Foothills Skyview Tower", "tower_xyz": "0604, -2127, 0098", "shrine": "Utsushok", "shrine_xyz": "0668, -3358, 0072", "found": false}, {"region": "Rospro Pass Sky", "tower": "Rospro Pass Skyview Tower", "tower_xyz": "-3679, 2346, 0233", "shrine": "Kahatanaum", "shrine_xyz": "-3295, 3430, 1347", "found": false}, {"region": "Popla Foothills", "tower": "Popla Foothills Skyview Tower", "tower_xyz": "0604, -2127, 0098", "shrine": "Ishokin", "shrine_xyz": "-0562, -3524, 0129", "found": false}, {"region": "Rospro Pass Sky", "tower": "Rospro Pass Skyview Tower", "tower_xyz": "-3679, 2346, 0233", "shrine": "Mayaumekis", "shrine_xyz": "-2947, 3051, 0897", "found": false}, {"region": "Popla Foothills", "tower": "Popla Foothills Skyview Tower", "tower_xyz": "0604, -2127, 0098", "shrine": "En-oma", "shrine_xyz": "0104, -2517, -0087", "found": false}, {"region": "Popla Foothills Sky", "tower": "Popla Foothills Skyview Tower", "tower_xyz": "0604, -2127, 0098", "shrine": "Joku-u", "shrine_xyz": "1375, -3339, 0429", "found": false}, {"region": "Popla Foothills Sky", "tower": "Popla Foothills Skyview Tower", "tower_xyz": "0604, -2127, 0098", "shrine": "Joku-usin", "shrine_xyz": "1077, -3349, 0786", "found": false}];
+</script>
+<script>
+(function () {
+  var PAGE_SNAPSHOT = document.documentElement.outerHTML;
+
+  var THEME_KEY = 'totk-shrine-theme';
+  var root = document.documentElement;
+  var themeToggle = document.getElementById('themeToggle');
+  var mql = window.matchMedia('(prefers-color-scheme: dark)');
+
+  function systemTheme() { return mql.matches ? 'dark' : 'light'; }
+  function getStoredTheme() {
+    try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; }
+  }
+  function applyTheme(theme, persist) {
+    if (theme) { root.setAttribute('data-theme', theme); }
+    else { root.removeAttribute('data-theme'); }
+    if (persist) {
+      try {
+        if (theme) { localStorage.setItem(THEME_KEY, theme); }
+        else { localStorage.removeItem(THEME_KEY); }
+      } catch (e) {}
+    }
+    var effective = theme || systemTheme();
+    themeToggle.setAttribute('data-effective', effective);
+    themeToggle.setAttribute('aria-pressed', String(effective === 'dark'));
+  }
+
+  applyTheme(getStoredTheme(), false);
+
+  themeToggle.addEventListener('click', function () {
+    var current = root.getAttribute('data-theme') || systemTheme();
+    applyTheme(current === 'dark' ? 'light' : 'dark', true);
+  });
+
+  mql.addEventListener('change', function () {
+    if (!getStoredTheme()) applyTheme(null, false);
+  });
+
+  var SHRINES = SHRINES_SEED;
+
+  SHRINES.forEach(function (s, i) { s.idx = i + 1; });
+
+  var STORAGE_KEY = 'totk-shrine-tracker-v1';
+  var found = {};
+  SHRINES.forEach(function (s) { found[s.shrine] = !!s.found; });
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      var stored = JSON.parse(raw) || {};
+      Object.keys(stored).forEach(function (k) {
+        if (Object.prototype.hasOwnProperty.call(found, k)) found[k] = !!stored[k];
+      });
+    }
+  } catch (e) {}
+
+  function saveFound() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(found)); } catch (e) {}
+  }
+
+  function buildExportHtml() {
+    var payload = SHRINES.map(function (s) {
+      return {
+        region: s.region,
+        tower: s.tower,
+        tower_xyz: s.tower_xyz,
+        shrine: s.shrine,
+        shrine_xyz: s.shrine_xyz,
+        found: !!found[s.shrine]
+      };
+    });
+    var json = JSON.stringify(payload).replace(/<\/script/g, '<\/script');
+    return PAGE_SNAPSHOT.replace(
+      /<script id="shrine-data">[\s\S]*?<\/script>/,
+      '<script id="shrine-data">var SHRINES_SEED = ' + json + ';<\/script>'
+    );
+  }
+
+  function fallbackDownload(html) {
+    var blob = new Blob([html], { type: 'text/html' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'shrines.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function viaFilePicker(html) {
+    return window.showSaveFilePicker({
+      suggestedName: 'shrines.html',
+      types: [{ description: 'HTML file', accept: { 'text/html': ['.html'] } }]
+    }).then(function (handle) {
+      return handle.createWritable().then(function (writable) {
+        return writable.write(html).then(function () { return writable.close(); });
+      });
+    });
+  }
+
+  function downloadExport() {
+    var html = buildExportHtml();
+
+    if (window.claude && typeof window.claude.use === 'function') {
+      window.claude.use('downloads').then(function (downloads) {
+        if (!downloads) { throw { code: 'unavailable' }; }
+        return downloads.save({ filename: 'shrines.html', data: html });
+      }).catch(function (err) {
+        var code = err && err.code;
+        if (code === 'declined' || code === 'rate_limited') return;
+        if (window.showSaveFilePicker) {
+          viaFilePicker(html).catch(function (e) {
+            if (e && e.name !== 'AbortError') fallbackDownload(html);
+          });
+        } else {
+          fallbackDownload(html);
+        }
+      });
+      return;
+    }
+
+    if (window.showSaveFilePicker) {
+      viaFilePicker(html).catch(function (err) {
+        if (err && err.name === 'AbortError') return;
+        fallbackDownload(html);
+      });
+    } else {
+      fallbackDownload(html);
+    }
+  }
+
+  var tableBody = document.getElementById('tableBody');
+  var searchInput = document.getElementById('searchInput');
+  var regionFilter = document.getElementById('regionFilter');
+  var resultCount = document.getElementById('resultCount');
+  var emptyState = document.getElementById('emptyState');
+  var progressNum = document.getElementById('progressNum');
+  var progressFill = document.getElementById('progressFill');
+  var resetBtn = document.getElementById('resetBtn');
+  var saveBtn = document.getElementById('saveBtn');
+
+  var regions = Array.from(new Set(SHRINES.map(function (s) { return s.region; })));
+  regions.forEach(function (r) {
+    var opt = document.createElement('option');
+    opt.value = r;
+    opt.textContent = r;
+    regionFilter.appendChild(opt);
+  });
+
+  var sortKey = 'idx';
+  var sortDir = 1;
+
+  function currentQuery() {
+    return searchInput.value.trim().toLowerCase();
+  }
+
+  function matches(s, q, region) {
+    if (region && s.region !== region) return false;
+    if (!q) return true;
+    return (
+      s.shrine.toLowerCase().indexOf(q) !== -1 ||
+      s.tower.toLowerCase().indexOf(q) !== -1 ||
+      s.region.toLowerCase().indexOf(q) !== -1
+    );
+  }
+
+  function render() {
+    var q = currentQuery();
+    var region = regionFilter.value;
+    var rows = SHRINES.filter(function (s) { return matches(s, q, region); });
+
+    rows.sort(function (a, b) {
+      var av, bv;
+      if (sortKey === 'found') {
+        av = found[a.shrine] ? 1 : 0;
+        bv = found[b.shrine] ? 1 : 0;
+      } else {
+        av = a[sortKey];
+        bv = b[sortKey];
+      }
+      if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * sortDir;
+      return String(av).localeCompare(String(bv)) * sortDir;
+    });
+
+    tableBody.innerHTML = '';
+    rows.forEach(function (s) {
+      var tr = document.createElement('tr');
+      if (found[s.shrine]) tr.className = 'is-found';
+
+      var tdIdx = document.createElement('td');
+      tdIdx.className = 'num';
+      tdIdx.textContent = s.idx;
+
+      var tdRegion = document.createElement('td');
+      var pill = document.createElement('span');
+      pill.className = 'region-pill';
+      pill.textContent = s.region;
+      tdRegion.appendChild(pill);
+
+      var tdTower = document.createElement('td');
+      tdTower.className = 'tower-name';
+      tdTower.textContent = s.tower;
+
+      var tdTowerXyz = document.createElement('td');
+      tdTowerXyz.className = 'coords';
+      tdTowerXyz.textContent = s.tower_xyz || '\u2014';
+
+      var tdShrine = document.createElement('td');
+      tdShrine.className = 'shrine-name';
+      tdShrine.textContent = s.shrine;
+
+      var tdShrineXyz = document.createElement('td');
+      tdShrineXyz.className = 'coords';
+      tdShrineXyz.textContent = s.shrine_xyz || '\u2014';
+
+      var tdFound = document.createElement('td');
+      tdFound.className = 'found-cell';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.className = 'found-check';
+      cb.checked = !!found[s.shrine];
+      cb.setAttribute('aria-label', 'Mark ' + s.shrine + ' as found');
+      cb.addEventListener('change', function () {
+        found[s.shrine] = cb.checked;
+        saveFound();
+        tr.className = cb.checked ? 'is-found' : '';
+        updateProgress();
+      });
+      tdFound.appendChild(cb);
+
+      tr.appendChild(tdIdx);
+      tr.appendChild(tdRegion);
+      tr.appendChild(tdTower);
+      tr.appendChild(tdTowerXyz);
+      tr.appendChild(tdShrine);
+      tr.appendChild(tdShrineXyz);
+      tr.appendChild(tdFound);
+      tableBody.appendChild(tr);
+    });
+
+    resultCount.textContent = rows.length + ' of ' + SHRINES.length + ' shown';
+    emptyState.hidden = rows.length !== 0;
+
+    document.querySelectorAll('thead button[data-key]').forEach(function (btn) {
+      var key = btn.getAttribute('data-key');
+      if (key === sortKey) {
+        btn.setAttribute('aria-sort', sortDir === 1 ? 'ascending' : 'descending');
+      } else {
+        btn.removeAttribute('aria-sort');
+      }
+    });
+  }
+
+  function updateProgress() {
+    var count = Object.keys(found).filter(function (k) { return found[k]; }).length;
+    progressNum.firstChild.textContent = count;
+    progressFill.style.width = (SHRINES.length ? (count / SHRINES.length) * 100 : 0) + '%';
+  }
+
+  document.querySelectorAll('thead button[data-key]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.getAttribute('data-key');
+      if (sortKey === key) { sortDir *= -1; } else { sortKey = key; sortDir = 1; }
+      render();
+    });
+  });
+
+  searchInput.addEventListener('input', render);
+  regionFilter.addEventListener('change', render);
+  resetBtn.addEventListener('click', function () {
+    if (!confirm('Clear all tracked shrines in this browser?')) return;
+    SHRINES.forEach(function (s) { found[s.shrine] = false; });
+    saveFound();
+    render();
+    updateProgress();
+  });
+  saveBtn.addEventListener('click', downloadExport);
+
+  updateProgress();
+  render();
+})();
+</script>
