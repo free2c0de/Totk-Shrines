@@ -105,7 +105,7 @@ body::-webkit-scrollbar-thumb:hover {
 .wrap {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 2.5rem 1.5rem 5rem;
+  padding: 4rem 1.5rem 5rem;
 }
 
 header.page {
@@ -433,6 +433,80 @@ td.num { color: var(--ink-faint); font-family: 'IBM Plex Mono', monospace; font-
   transform: translateY(0);
 }
 
+.columns-dialog {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  max-width: 320px;
+  width: calc(100% - 2.5rem);
+}
+
+.columns-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.columns-dialog-inner {
+  padding: 1.25rem 1.25rem 1.5rem;
+}
+
+.columns-dialog h2 {
+  margin: 0 0 0.9rem;
+  font-family: 'Cinzel', 'Georgia', serif;
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--ink);
+}
+
+.columns-list {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.columns-list button {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--ink-muted);
+  font-family: 'Work Sans', sans-serif;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.columns-list button:hover {
+  border-color: var(--border-strong);
+}
+
+.columns-list button.is-active {
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.columns-list button .check {
+  font-size: 0.85rem;
+  color: var(--accent);
+  opacity: 0;
+}
+
+.columns-list button.is-active .check {
+  opacity: 1;
+}
+
 .region-pill {
   display: inline-block;
   font-size: 0.76rem;
@@ -539,6 +613,7 @@ footer.page a { color: var(--accent-2-strong); }
     <select id="regionFilter" aria-label="Filter by region"><option value="">All regions</option></select>
     <button type="button" class="reset" id="saveBtn" title="Saves a copy of this file with your checkmarks baked in, so they don't depend on browser storage. Lets you choose the folder if your browser supports it, otherwise downloads to your default downloads location.">Save progress to file</button>
     <button type="button" class="reset" id="resetBtn">Reset tracker</button>
+    <button type="button" class="reset" id="columnsBtn">Columns</button>
     <span class="count" id="resultCount"></span>
   </div>
 
@@ -546,17 +621,25 @@ footer.page a { color: var(--accent-2-strong); }
     <table>
       <thead>
         <tr>
-          <th style="width:3.5rem;"><button data-key="idx" aria-sort="ascending">#<span class="arrow">&#9662;</span></button></th>
-          <th style="width:4.5rem;"><button data-key="found">Found<span class="arrow">&#9662;</span></button></th>
-          <th><button data-key="shrine">Shrine<span class="arrow">&#9662;</span></button></th>
-          <th><button data-key="region">Region<span class="arrow">&#9662;</span></button></th>
-          <th><button data-key="tower">Skyview Tower<span class="arrow">&#9662;</span></button></th>
+          <th style="width:3.5rem;" data-col="idx"><button data-key="idx" aria-sort="ascending">#<span class="arrow">&#9662;</span></button></th>
+          <th style="width:4.5rem;" data-col="found"><button data-key="found">Found<span class="arrow">&#9662;</span></button></th>
+          <th data-col="shrine"><button data-key="shrine">Shrine<span class="arrow">&#9662;</span></button></th>
+          <th data-col="region"><button data-key="region">Region<span class="arrow">&#9662;</span></button></th>
+          <th data-col="tower"><button data-key="tower">Skyview Tower<span class="arrow">&#9662;</span></button></th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
     </table>
     <div class="empty-state" id="emptyState" hidden>No shrines match your search.</div>
   </div>
+
+  <dialog class="columns-dialog" id="columnsDialog">
+    <div class="columns-dialog-inner">
+      <h2>Columns</h2>
+      <ul class="columns-list" id="columnsList"></ul>
+      <button type="button" class="reset" id="columnsCloseBtn">Done</button>
+    </div>
+  </dialog>
 
   <footer class="page">
     <span>Checkmarks are remembered automatically in this browser; click &ldquo;Save progress to file&rdquo; to bake them permanently into a downloaded copy of this page.</span>
@@ -717,6 +800,7 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
   document.body.appendChild(coordTip);
 
   var longPressTimer = null;
+  var pinnedTipEl = null;
 
   function showCoordTip(text, x, y) {
     coordTip.textContent = text;
@@ -727,6 +811,7 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
 
   function hideCoordTip() {
     coordTip.classList.remove('visible');
+    pinnedTipEl = null;
   }
 
   function attachCoordTip(el, coordsText) {
@@ -739,25 +824,96 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
       coordTip.style.left = (e.clientX + 12) + 'px';
       coordTip.style.top = (e.clientY + 16) + 'px';
     });
-    el.addEventListener('mouseleave', hideCoordTip);
+    el.addEventListener('mouseleave', function () {
+      if (!pinnedTipEl) hideCoordTip();
+    });
     el.addEventListener('touchstart', function (e) {
       var touch = e.touches[0];
       var x = touch.clientX;
       var y = touch.clientY;
+      clearTimeout(longPressTimer);
       longPressTimer = setTimeout(function () {
         showCoordTip(coordsText, x, y - 44);
+        pinnedTipEl = el;
       }, 500);
     }, { passive: true });
     el.addEventListener('touchend', function () {
       clearTimeout(longPressTimer);
-      hideCoordTip();
     });
     el.addEventListener('touchmove', function () {
       clearTimeout(longPressTimer);
-      hideCoordTip();
     });
     el.addEventListener('contextmenu', function (e) { e.preventDefault(); });
   }
+
+  document.addEventListener('touchstart', function (e) {
+    if (pinnedTipEl && !pinnedTipEl.contains(e.target)) hideCoordTip();
+  }, { passive: true });
+
+  document.addEventListener('click', function (e) {
+    if (pinnedTipEl && !pinnedTipEl.contains(e.target)) hideCoordTip();
+  });
+
+  var COLUMNS = [
+    { key: 'idx', label: '#' },
+    { key: 'found', label: 'Found' },
+    { key: 'shrine', label: 'Shrine' },
+    { key: 'region', label: 'Region' },
+    { key: 'tower', label: 'Skyview Tower' }
+  ];
+
+  var HIDDEN_COLS_KEY = 'totk-shrine-hidden-cols';
+  var hiddenCols = {};
+  try {
+    hiddenCols = JSON.parse(localStorage.getItem(HIDDEN_COLS_KEY) || '{}') || {};
+  } catch (e) { hiddenCols = {}; }
+
+  function saveHiddenCols() {
+    try { localStorage.setItem(HIDDEN_COLS_KEY, JSON.stringify(hiddenCols)); } catch (e) {}
+  }
+
+  function applyColumnVisibility() {
+    COLUMNS.forEach(function (col) {
+      var hidden = !!hiddenCols[col.key];
+      document.querySelectorAll('[data-col="' + col.key + '"]').forEach(function (el) {
+        el.style.display = hidden ? 'none' : '';
+      });
+    });
+  }
+
+  var columnsDialog = document.getElementById('columnsDialog');
+  var columnsList = document.getElementById('columnsList');
+  var columnsBtn = document.getElementById('columnsBtn');
+  var columnsCloseBtn = document.getElementById('columnsCloseBtn');
+
+  function renderColumnsList() {
+    columnsList.innerHTML = '';
+    COLUMNS.forEach(function (col) {
+      var li = document.createElement('li');
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      var active = !hiddenCols[col.key];
+      btn.className = active ? 'is-active' : '';
+      btn.innerHTML = '<span>' + col.label + '</span><span class="check">&#10003;</span>';
+      btn.addEventListener('click', function () {
+        hiddenCols[col.key] = active;
+        saveHiddenCols();
+        applyColumnVisibility();
+        renderColumnsList();
+      });
+      li.appendChild(btn);
+      columnsList.appendChild(li);
+    });
+  }
+
+  columnsBtn.addEventListener('click', function () {
+    renderColumnsList();
+    columnsDialog.showModal();
+  });
+
+  columnsCloseBtn.addEventListener('click', function () {
+    columnsDialog.close();
+  });
 
   var tableBody = document.getElementById('tableBody');
   var searchInput = document.getElementById('searchInput');
@@ -819,10 +975,12 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
 
       var tdIdx = document.createElement('td');
       tdIdx.className = 'num';
+      tdIdx.setAttribute('data-col', 'idx');
       tdIdx.textContent = s.idx;
 
       var tdFound = document.createElement('td');
       tdFound.className = 'found-cell';
+      tdFound.setAttribute('data-col', 'found');
       var cb = document.createElement('input');
       cb.type = 'checkbox';
       cb.className = 'found-check';
@@ -838,10 +996,12 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
 
       var tdShrine = document.createElement('td');
       tdShrine.className = 'shrine-name';
+      tdShrine.setAttribute('data-col', 'shrine');
       tdShrine.textContent = s.shrine;
       attachCoordTip(tdShrine, s.shrine_xyz);
 
       var tdRegion = document.createElement('td');
+      tdRegion.setAttribute('data-col', 'region');
       var pill = document.createElement('span');
       pill.className = 'region-pill';
       pill.textContent = s.region;
@@ -849,6 +1009,7 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
 
       var tdTower = document.createElement('td');
       tdTower.className = 'tower-name';
+      tdTower.setAttribute('data-col', 'tower');
       tdTower.textContent = s.tower;
       attachCoordTip(tdTower, s.tower_xyz);
 
@@ -861,6 +1022,7 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
     });
 
     emptyState.hidden = rows.length !== 0;
+    applyColumnVisibility();
 
     document.querySelectorAll('thead button[data-key]').forEach(function (btn) {
       var key = btn.getAttribute('data-key');
