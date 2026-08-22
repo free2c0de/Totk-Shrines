@@ -307,6 +307,8 @@ th button:focus-visible {
 .table-scroll {
   overflow: auto;
   max-height: 68vh;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
   border: 1px solid var(--border);
   border-radius: 10px;
   box-shadow: var(--shadow);
@@ -589,7 +591,7 @@ footer.page a { color: var(--accent-2-strong); }
     <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"></path></svg>
     <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"></path></svg>
   </button>
-  <span class="version-tag">Version: 08.22.2026 v4</span>
+  <span class="version-tag">08.22.2026 v5</span>
 </div>
 <div class="wrap">
   <header class="page">
@@ -841,10 +843,10 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
     }, { passive: true });
     el.addEventListener('touchend', function () {
       clearTimeout(longPressTimer);
-    });
+    }, { passive: true });
     el.addEventListener('touchmove', function () {
       clearTimeout(longPressTimer);
-    });
+    }, { passive: true });
     el.addEventListener('contextmenu', function (e) { e.preventDefault(); });
   }
 
@@ -865,9 +867,9 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
   ];
 
   // Mobile-first: a column appears once the viewport is at least this wide,
-  // in ascending precedence (idx lowest, found highest). Shrine is always shown.
+  // in ascending precedence (idx lowest, tower highest). Shrine and Found
+  // are always shown by default unless the user excludes them manually.
   var AUTO_COL_BREAKPOINTS = {
-    found: 400,
     region: 480,
     tower: 560,
     idx: 640
@@ -882,23 +884,20 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
     return auto;
   }
 
-  var HIDDEN_COLS_KEY = 'totk-shrine-hidden-cols';
-  var USER_SET_COLS_KEY = 'totk-shrine-cols-user-set';
+  // Column persistence temporarily disabled for testing — state is in-memory only
+  // and resets on every reload. Re-enable by restoring the localStorage calls below.
   var hiddenCols = {};
-  try {
-    hiddenCols = JSON.parse(localStorage.getItem(HIDDEN_COLS_KEY) || '{}') || {};
-  } catch (e) { hiddenCols = {}; }
+  var userSetColumnsFlag = false;
 
   function userHasSetColumns() {
-    try { return localStorage.getItem(USER_SET_COLS_KEY) === '1'; } catch (e) { return false; }
+    return userSetColumnsFlag;
   }
 
   function markUserSetColumns() {
-    try { localStorage.setItem(USER_SET_COLS_KEY, '1'); } catch (e) {}
+    userSetColumnsFlag = true;
   }
 
   function saveHiddenCols() {
-    try { localStorage.setItem(HIDDEN_COLS_KEY, JSON.stringify(hiddenCols)); } catch (e) {}
   }
 
   function effectiveHiddenCols() {
