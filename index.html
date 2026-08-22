@@ -304,13 +304,18 @@ th button:focus-visible {
   background: var(--surface-2);
 }
 
-.table-scroll {
-  overflow: auto;
-  max-height: 68vh;
-  -webkit-overflow-scrolling: touch;
+.table-frame {
   border: 1px solid var(--border);
   border-radius: 10px;
   box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.table-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 68vh;
+  -webkit-overflow-scrolling: touch;
   background: var(--surface);
   scrollbar-width: thin;
   scrollbar-color: var(--border-strong) var(--surface-2);
@@ -340,14 +345,13 @@ th button:focus-visible {
 }
 
 table {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   width: 100%;
+  table-layout: fixed;
 }
 
 thead th {
-  position: sticky;
-  top: 0;
-  z-index: 2;
   background: var(--surface-2);
   text-align: left;
   font-family: 'Work Sans', sans-serif;
@@ -358,6 +362,8 @@ thead th {
   padding: 0.7rem 0.9rem;
   border-bottom: 1px solid var(--border-strong);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 thead th button {
@@ -388,6 +394,7 @@ tbody td {
   border-bottom: 1px solid var(--border);
   font-size: 0.9rem;
   vertical-align: middle;
+  overflow-wrap: anywhere;
 }
 
 tbody tr:last-child td { border-bottom: none; }
@@ -589,7 +596,7 @@ footer.page a { color: var(--accent-2-strong); }
     <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"></path></svg>
     <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"></path></svg>
   </button>
-  <span class="version-tag">08.22.2026 v5</span>
+  <span class="version-tag">08.22.2026 v6</span>
 </div>
 <div class="wrap">
   <header class="page">
@@ -617,20 +624,24 @@ footer.page a { color: var(--accent-2-strong); }
     <span class="count" id="resultCount"></span>
   </div>
 
-  <div class="table-scroll">
-    <table>
+  <div class="table-frame">
+    <table class="header-table">
       <thead>
         <tr>
-          <th style="width:3.5rem;" data-col="idx"><button data-key="idx" aria-sort="ascending">#<span class="arrow">&#9662;</span></button></th>
-          <th style="width:4.5rem;" data-col="found"><button data-key="found">Found<span class="arrow">&#9662;</span></button></th>
+          <th data-col="idx"><button data-key="idx" aria-sort="ascending">#<span class="arrow">&#9662;</span></button></th>
+          <th data-col="found"><button data-key="found">Found<span class="arrow">&#9662;</span></button></th>
           <th data-col="shrine"><button data-key="shrine">Shrine<span class="arrow">&#9662;</span></button></th>
           <th data-col="region"><button data-key="region">Region<span class="arrow">&#9662;</span></button></th>
           <th data-col="tower"><button data-key="tower">Skyview Tower<span class="arrow">&#9662;</span></button></th>
         </tr>
       </thead>
-      <tbody id="tableBody"></tbody>
     </table>
-    <div class="empty-state" id="emptyState" hidden>No shrines match your search.</div>
+    <div class="table-scroll">
+      <table class="body-table">
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" hidden>No shrines match your search.</div>
+    </div>
   </div>
 
   <dialog class="columns-dialog" id="columnsDialog">
@@ -902,12 +913,26 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
     return userHasSetColumns() ? hiddenCols : computeAutoHiddenCols();
   }
 
+  // The header lives in its own separate <table> from the body (so it never
+  // needs position:sticky), so both tables use table-layout:fixed with these
+  // matching percentage widths to keep their columns pixel-aligned.
+  var COLUMN_WEIGHTS = { idx: 8, found: 14, shrine: 30, region: 22, tower: 26 };
+
   function applyColumnVisibility() {
     var effective = effectiveHiddenCols();
     COLUMNS.forEach(function (col) {
       var hidden = !!effective[col.key];
       document.querySelectorAll('[data-col="' + col.key + '"]').forEach(function (el) {
         el.style.display = hidden ? 'none' : '';
+      });
+    });
+
+    var visibleKeys = Object.keys(COLUMN_WEIGHTS).filter(function (key) { return !effective[key]; });
+    var totalWeight = visibleKeys.reduce(function (sum, key) { return sum + COLUMN_WEIGHTS[key]; }, 0);
+    visibleKeys.forEach(function (key) {
+      var pct = (COLUMN_WEIGHTS[key] / totalWeight) * 100;
+      document.querySelectorAll('[data-col="' + key + '"]').forEach(function (el) {
+        el.style.width = pct + '%';
       });
     });
   }
