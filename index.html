@@ -352,6 +352,7 @@ table {
   border-collapse: separate;
   border-spacing: 0;
   width: 100%;
+  margin: 0;
   table-layout: fixed;
 }
 
@@ -374,12 +375,17 @@ thead th button {
   all: unset;
   cursor: pointer;
   display: inline-flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 0.3rem;
   color: inherit;
   font: inherit;
   letter-spacing: inherit;
   text-transform: inherit;
+  white-space: nowrap;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 thead th button .arrow {
@@ -399,6 +405,10 @@ tbody td {
   font-size: 0.9rem;
   vertical-align: middle;
   overflow-wrap: anywhere;
+}
+
+[data-col="shrine"] {
+  padding-left: 1.75rem;
 }
 
 tbody tr:last-child td { border-bottom: none; }
@@ -602,7 +612,7 @@ footer.page a { color: var(--accent-2-strong); }
     <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"></path></svg>
     <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"></path></svg>
   </button>
-  <span class="version-tag">08.22.2026 v9</span>
+  <span class="version-tag">08.22.2026 v12</span>
 </div>
 <div class="wrap">
   <header class="page">
@@ -928,7 +938,7 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
   // visible set doesn't fit the viewport, the table grows wider and the
   // container scrolls horizontally instead of squeezing/overlapping content.
   var COLUMN_ORDER = ['idx', 'found', 'shrine', 'region', 'tower'];
-  var COLUMN_MIN_WIDTH = { idx: 58, found: 64, shrine: 150, region: 195, tower: 190 };
+  var COLUMN_MIN_WIDTH = { idx: 58, found: 64, shrine: 165, region: 195, tower: 190 };
 
   function applyColumnVisibility() {
     var effective = effectiveHiddenCols();
@@ -939,15 +949,23 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
       });
     });
 
+    // Every column keeps its own minimum width so content never has to
+    // compress below readability. The rightmost visible column stretches to
+    // fill any leftover space (keeping earlier columns anchored left, as
+    // expected), unless the visible set is already too wide for the
+    // viewport — then nothing flexes and the container scrolls horizontally
+    // instead of squeezing or overlapping content.
     var visibleKeys = COLUMN_ORDER.filter(function (key) { return !effective[key]; });
     var lastKey = visibleKeys[visibleKeys.length - 1];
     var totalMinWidth = visibleKeys.reduce(function (sum, key) { return sum + COLUMN_MIN_WIDTH[key]; }, 0);
     var containerWidth = tableScrollEl ? tableScrollEl.clientWidth : 0;
     var canFlexLast = totalMinWidth < containerWidth;
+
     visibleKeys.forEach(function (key) {
       var flexThis = canFlexLast && key === lastKey;
       document.querySelectorAll('[data-col="' + key + '"]').forEach(function (el) {
         el.style.width = flexThis ? '' : COLUMN_MIN_WIDTH[key] + 'px';
+        el.style.maxWidth = flexThis ? '' : COLUMN_MIN_WIDTH[key] + 'px';
         el.style.minWidth = COLUMN_MIN_WIDTH[key] + 'px';
       });
     });
