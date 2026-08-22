@@ -273,10 +273,19 @@ th button:focus-visible {
 }
 
 .toolbar .count {
-  font-size: 0.82rem;
-  color: var(--ink-muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent);
   margin-left: auto;
   white-space: nowrap;
+}
+
+.toolbar .count span {
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+  font-weight: 500;
 }
 
 .toolbar button.reset {
@@ -439,7 +448,7 @@ footer.page {
 footer.page a { color: var(--accent-2-strong); }
 
 .corner-tag {
-  position: fixed;
+  position: absolute;
   top: 0.5rem;
   right: 0.75rem;
   z-index: 10;
@@ -477,7 +486,7 @@ footer.page a { color: var(--accent-2-strong); }
     <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"></path></svg>
     <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"></path></svg>
   </button>
-  <span class="version-tag">Version: 08.22.2026 v2</span>
+  <span class="version-tag">Version: 08.22.2026 v3</span>
 </div>
 <div class="wrap">
   <header class="page">
@@ -523,7 +532,6 @@ footer.page a { color: var(--accent-2-strong); }
   </div>
 
   <footer class="page">
-    <span>152 shrines compiled from the source spreadsheet.</span>
     <span>Checkmarks are remembered automatically in this browser; click &ldquo;Save progress to file&rdquo; to bake them permanently into a downloaded copy of this page.</span>
   </footer>
 </div>
@@ -786,7 +794,6 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
       tableBody.appendChild(tr);
     });
 
-    resultCount.textContent = rows.length + ' of ' + SHRINES.length + ' shown';
     emptyState.hidden = rows.length !== 0;
 
     document.querySelectorAll('thead button[data-key]').forEach(function (btn) {
@@ -803,6 +810,7 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
     var count = Object.keys(found).filter(function (k) { return found[k]; }).length;
     progressNum.firstChild.textContent = count;
     progressFill.style.width = (SHRINES.length ? (count / SHRINES.length) * 100 : 0) + '%';
+    resultCount.innerHTML = count + '<span>&nbsp;/ ' + SHRINES.length + ' found</span>';
   }
 
   document.querySelectorAll('thead button[data-key]').forEach(function (btn) {
