@@ -341,7 +341,7 @@ th button:focus-visible {
 table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 880px;
+  min-width: 560px;
 }
 
 thead th {
@@ -400,9 +400,38 @@ tbody tr.is-found .shrine-name { text-decoration: line-through; text-decoration-
 
 td.num { color: var(--ink-faint); font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; }
 
-td.coords, .coords { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; font-size: 0.82rem; color: var(--ink-muted); white-space: nowrap; }
-
 .shrine-name { font-weight: 600; color: var(--ink); }
+
+.coord-tip-target {
+  cursor: help;
+  border-bottom: 1px dotted var(--border-strong);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.coord-tip {
+  position: fixed;
+  z-index: 20;
+  background: var(--ink);
+  color: var(--surface);
+  font-family: 'IBM Plex Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.78rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+.coord-tip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 .region-pill {
   display: inline-block;
@@ -518,12 +547,10 @@ footer.page a { color: var(--accent-2-strong); }
       <thead>
         <tr>
           <th style="width:3.5rem;"><button data-key="idx" aria-sort="ascending">#<span class="arrow">&#9662;</span></button></th>
+          <th style="width:4.5rem;"><button data-key="found">Found<span class="arrow">&#9662;</span></button></th>
+          <th><button data-key="shrine">Shrine<span class="arrow">&#9662;</span></button></th>
           <th><button data-key="region">Region<span class="arrow">&#9662;</span></button></th>
           <th><button data-key="tower">Skyview Tower<span class="arrow">&#9662;</span></button></th>
-          <th>Tower Coords</th>
-          <th><button data-key="shrine">Shrine<span class="arrow">&#9662;</span></button></th>
-          <th>Shrine Coords</th>
-          <th style="width:4.5rem;"><button data-key="found">Found<span class="arrow">&#9662;</span></button></th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
@@ -685,6 +712,53 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
     }
   }
 
+  var coordTip = document.createElement('div');
+  coordTip.className = 'coord-tip';
+  document.body.appendChild(coordTip);
+
+  var longPressTimer = null;
+
+  function showCoordTip(text, x, y) {
+    coordTip.textContent = text;
+    coordTip.style.left = x + 'px';
+    coordTip.style.top = y + 'px';
+    coordTip.classList.add('visible');
+  }
+
+  function hideCoordTip() {
+    coordTip.classList.remove('visible');
+  }
+
+  function attachCoordTip(el, coordsText) {
+    if (!coordsText || coordsText === 'N/A') return;
+    el.classList.add('coord-tip-target');
+    el.addEventListener('mouseenter', function (e) {
+      showCoordTip(coordsText, e.clientX + 12, e.clientY + 16);
+    });
+    el.addEventListener('mousemove', function (e) {
+      coordTip.style.left = (e.clientX + 12) + 'px';
+      coordTip.style.top = (e.clientY + 16) + 'px';
+    });
+    el.addEventListener('mouseleave', hideCoordTip);
+    el.addEventListener('touchstart', function (e) {
+      var touch = e.touches[0];
+      var x = touch.clientX;
+      var y = touch.clientY;
+      longPressTimer = setTimeout(function () {
+        showCoordTip(coordsText, x, y - 44);
+      }, 500);
+    }, { passive: true });
+    el.addEventListener('touchend', function () {
+      clearTimeout(longPressTimer);
+      hideCoordTip();
+    });
+    el.addEventListener('touchmove', function () {
+      clearTimeout(longPressTimer);
+      hideCoordTip();
+    });
+    el.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  }
+
   var tableBody = document.getElementById('tableBody');
   var searchInput = document.getElementById('searchInput');
   var regionFilter = document.getElementById('regionFilter');
@@ -747,28 +821,6 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
       tdIdx.className = 'num';
       tdIdx.textContent = s.idx;
 
-      var tdRegion = document.createElement('td');
-      var pill = document.createElement('span');
-      pill.className = 'region-pill';
-      pill.textContent = s.region;
-      tdRegion.appendChild(pill);
-
-      var tdTower = document.createElement('td');
-      tdTower.className = 'tower-name';
-      tdTower.textContent = s.tower;
-
-      var tdTowerXyz = document.createElement('td');
-      tdTowerXyz.className = 'coords';
-      tdTowerXyz.textContent = s.tower_xyz || '\u2014';
-
-      var tdShrine = document.createElement('td');
-      tdShrine.className = 'shrine-name';
-      tdShrine.textContent = s.shrine;
-
-      var tdShrineXyz = document.createElement('td');
-      tdShrineXyz.className = 'coords';
-      tdShrineXyz.textContent = s.shrine_xyz || '\u2014';
-
       var tdFound = document.createElement('td');
       tdFound.className = 'found-cell';
       var cb = document.createElement('input');
@@ -784,13 +836,27 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
       });
       tdFound.appendChild(cb);
 
+      var tdShrine = document.createElement('td');
+      tdShrine.className = 'shrine-name';
+      tdShrine.textContent = s.shrine;
+      attachCoordTip(tdShrine, s.shrine_xyz);
+
+      var tdRegion = document.createElement('td');
+      var pill = document.createElement('span');
+      pill.className = 'region-pill';
+      pill.textContent = s.region;
+      tdRegion.appendChild(pill);
+
+      var tdTower = document.createElement('td');
+      tdTower.className = 'tower-name';
+      tdTower.textContent = s.tower;
+      attachCoordTip(tdTower, s.tower_xyz);
+
       tr.appendChild(tdIdx);
+      tr.appendChild(tdFound);
+      tr.appendChild(tdShrine);
       tr.appendChild(tdRegion);
       tr.appendChild(tdTower);
-      tr.appendChild(tdTowerXyz);
-      tr.appendChild(tdShrine);
-      tr.appendChild(tdShrineXyz);
-      tr.appendChild(tdFound);
       tableBody.appendChild(tr);
     });
 
