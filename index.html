@@ -455,9 +455,11 @@ footer.page a { color: var(--accent-2-strong); }
   pointer-events: none;
 }
 
-.theme-toggle-slot {
-  display: block;
-  margin: 0.5rem 0 0.75rem;
+.h1-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .theme-toggle-slot:empty {
@@ -481,8 +483,10 @@ footer.page a { color: var(--accent-2-strong); }
   <header class="page">
     <div class="titleblock">
       <div class="eyebrow">Tears of the Kingdom &middot; Shrine Reference</div>
-      <h1>Shrines of Hyrule</h1>
-      <span class="theme-toggle-slot" id="themeToggleSlot"></span>
+      <div class="h1-row">
+        <h1>Shrines of Hyrule</h1>
+        <span class="theme-toggle-slot" id="themeToggleSlot"></span>
+      </div>
       <p>Every shrine location gathered from its Skyview Tower, with tower and shrine coordinates for fast-travel.</p>
     </div>
     <div class="progress-card">
