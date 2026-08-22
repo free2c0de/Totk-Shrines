@@ -444,12 +444,24 @@ footer.page {
 
 footer.page a { color: var(--accent-2-strong); }
 
+.version-tag {
+  position: fixed;
+  top: 0.5rem;
+  right: 0.75rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--ink-faint);
+  z-index: 10;
+  pointer-events: none;
+}
+
 @media (max-width: 640px) {
   .toolbar { position: static; }
   .table-scroll { max-height: 72vh; }
 }
 </style>
 
+<div class="version-tag">Version: 08.22.2026 v1</div>
 <div class="wrap">
   <header class="page">
     <div class="titleblock">
