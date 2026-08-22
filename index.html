@@ -801,6 +801,7 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
 
   var longPressTimer = null;
   var pinnedTipEl = null;
+  var suppressNextClick = false;
 
   function showCoordTip(text, x, y) {
     coordTip.textContent = text;
@@ -835,6 +836,7 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
       longPressTimer = setTimeout(function () {
         showCoordTip(coordsText, x, y - 44);
         pinnedTipEl = el;
+        suppressNextClick = true;
       }, 500);
     }, { passive: true });
     el.addEventListener('touchend', function () {
@@ -852,34 +854,68 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
 
   document.addEventListener('click', function (e) {
     if (pinnedTipEl && !pinnedTipEl.contains(e.target)) hideCoordTip();
+    suppressNextClick = false;
   });
 
   var COLUMNS = [
     { key: 'idx', label: '#' },
-    { key: 'found', label: 'Found' },
-    { key: 'shrine', label: 'Shrine' },
+    { key: 'tower', label: 'Skyview Tower' },
     { key: 'region', label: 'Region' },
-    { key: 'tower', label: 'Skyview Tower' }
+    { key: 'found', label: 'Found' }
   ];
 
+  // Mobile-first: a column appears once the viewport is at least this wide,
+  // in ascending precedence (idx lowest, found highest). Shrine is always shown.
+  var AUTO_COL_BREAKPOINTS = {
+    found: 400,
+    region: 480,
+    tower: 560,
+    idx: 640
+  };
+
+  function computeAutoHiddenCols() {
+    var w = window.innerWidth;
+    var auto = {};
+    Object.keys(AUTO_COL_BREAKPOINTS).forEach(function (key) {
+      if (w < AUTO_COL_BREAKPOINTS[key]) auto[key] = true;
+    });
+    return auto;
+  }
+
   var HIDDEN_COLS_KEY = 'totk-shrine-hidden-cols';
+  var USER_SET_COLS_KEY = 'totk-shrine-cols-user-set';
   var hiddenCols = {};
   try {
     hiddenCols = JSON.parse(localStorage.getItem(HIDDEN_COLS_KEY) || '{}') || {};
   } catch (e) { hiddenCols = {}; }
 
+  function userHasSetColumns() {
+    try { return localStorage.getItem(USER_SET_COLS_KEY) === '1'; } catch (e) { return false; }
+  }
+
+  function markUserSetColumns() {
+    try { localStorage.setItem(USER_SET_COLS_KEY, '1'); } catch (e) {}
+  }
+
   function saveHiddenCols() {
     try { localStorage.setItem(HIDDEN_COLS_KEY, JSON.stringify(hiddenCols)); } catch (e) {}
   }
 
+  function effectiveHiddenCols() {
+    return userHasSetColumns() ? hiddenCols : computeAutoHiddenCols();
+  }
+
   function applyColumnVisibility() {
+    var effective = effectiveHiddenCols();
     COLUMNS.forEach(function (col) {
-      var hidden = !!hiddenCols[col.key];
+      var hidden = !!effective[col.key];
       document.querySelectorAll('[data-col="' + col.key + '"]').forEach(function (el) {
         el.style.display = hidden ? 'none' : '';
       });
     });
   }
+
+  window.addEventListener('resize', applyColumnVisibility);
 
   var columnsDialog = document.getElementById('columnsDialog');
   var columnsList = document.getElementById('columnsList');
@@ -887,15 +923,20 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
   var columnsCloseBtn = document.getElementById('columnsCloseBtn');
 
   function renderColumnsList() {
+    var effective = effectiveHiddenCols();
     columnsList.innerHTML = '';
     COLUMNS.forEach(function (col) {
       var li = document.createElement('li');
       var btn = document.createElement('button');
       btn.type = 'button';
-      var active = !hiddenCols[col.key];
+      var active = !effective[col.key];
       btn.className = active ? 'is-active' : '';
       btn.innerHTML = '<span>' + col.label + '</span><span class="check">&#10003;</span>';
       btn.addEventListener('click', function () {
+        if (!userHasSetColumns()) {
+          hiddenCols = computeAutoHiddenCols();
+          markUserSetColumns();
+        }
         hiddenCols[col.key] = active;
         saveHiddenCols();
         applyColumnVisibility();
@@ -999,6 +1040,14 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
       tdShrine.setAttribute('data-col', 'shrine');
       tdShrine.textContent = s.shrine;
       attachCoordTip(tdShrine, s.shrine_xyz);
+      tdShrine.addEventListener('click', function () {
+        if (suppressNextClick) return;
+        cb.checked = !cb.checked;
+        found[s.shrine] = cb.checked;
+        saveFound();
+        tr.className = cb.checked ? 'is-found' : '';
+        updateProgress();
+      });
 
       var tdRegion = document.createElement('td');
       tdRegion.setAttribute('data-col', 'region');
