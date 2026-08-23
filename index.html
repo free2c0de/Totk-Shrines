@@ -674,6 +674,16 @@ footer.page a { color: var(--accent-2-strong); }
   gap: 0.75rem;
 }
 
+.progress-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.progress-row .theme-toggle-slot {
+  margin-left: auto;
+}
+
 .theme-toggle-slot:empty {
   display: none;
 }
@@ -681,6 +691,7 @@ footer.page a { color: var(--accent-2-strong); }
 @media (max-width: 640px) {
   .toolbar { position: static; }
   .table-scroll { max-height: 72vh; }
+  .progress-row { width: 100%; }
 }
 </style>
 
@@ -689,7 +700,7 @@ footer.page a { color: var(--accent-2-strong); }
     <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"></path></svg>
     <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"></path></svg>
   </button>
-  <span class="version-tag">08.22.2026 v23</span>
+  <span class="version-tag">08.22.2026 v27</span>
 </div>
 <div class="wrap">
   <header class="page">
@@ -698,14 +709,16 @@ footer.page a { color: var(--accent-2-strong); }
       <div class="h1-row">
         <img class="shrine-icon-title" src="Assets/Totk%20Shrine%20Icon.png" alt="" aria-hidden="true">
         <h1>Shrines of Hyrule</h1>
-        <span class="theme-toggle-slot" id="themeToggleSlot"></span>
       </div>
       <p>Every shrine location gathered from its Skyview Tower, with tower and shrine coordinates for fast-travel.</p>
     </div>
-    <div class="progress-card">
-      <div class="label">Shrines found</div>
-      <div class="num" id="progressNum">0<span>&nbsp;/ 152</span></div>
-      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-row">
+      <div class="progress-card">
+        <div class="label">Shrines found</div>
+        <div class="num" id="progressNum">0<span>&nbsp;/ 152</span></div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+      <span class="theme-toggle-slot" id="themeToggleSlot"></span>
     </div>
   </header>
 
@@ -909,6 +922,15 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
   var longPressTimer = null;
   var pinnedTipEl = null;
   var suppressNextClick = false;
+  var lastTouchTime = 0;
+
+  document.addEventListener('touchstart', function () {
+    lastTouchTime = Date.now();
+  }, { passive: true, capture: true });
+
+  function isRecentTouch() {
+    return (Date.now() - lastTouchTime) < 800;
+  }
 
   function showCoordTip(text, x, y) {
     coordTip.textContent = text;
@@ -926,13 +948,16 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
     if (!coordsText || coordsText === 'N/A') return;
     el.classList.add('coord-tip-target');
     el.addEventListener('mouseenter', function (e) {
+      if (isRecentTouch()) return;
       showCoordTip(coordsText, e.clientX + 12, e.clientY + 16);
     });
     el.addEventListener('mousemove', function (e) {
+      if (isRecentTouch()) return;
       coordTip.style.left = (e.clientX + 12) + 'px';
       coordTip.style.top = (e.clientY + 16) + 'px';
     });
     el.addEventListener('mouseleave', function () {
+      if (isRecentTouch()) return;
       if (!pinnedTipEl) hideCoordTip();
     });
     el.addEventListener('touchstart', function (e) {
