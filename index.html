@@ -1,6 +1,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shrines of Hyrule</title>
+<link rel="icon" type="image/png" href="Assets/Totk%20Shrine%20Icon.png">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
@@ -435,31 +436,33 @@ tbody tr.is-found .shrine-name { text-decoration: line-through; text-decoration-
 td.num { color: var(--ink-faint); font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; white-space: nowrap; }
 
 .shrine-name {
-  position: relative;
   font-family: 'Cinzel', 'Georgia', serif;
   font-weight: 600;
   font-size: 1rem;
   letter-spacing: 0.02em;
   color: var(--ink);
+  white-space: nowrap;
+  overflow-wrap: normal;
 }
 
-.shrine-name::before {
-  content: '';
-  position: absolute;
-  left: 0.55rem;
-  top: 50%;
-  width: 7px;
-  height: 7px;
-  transform: translateY(-50%) rotate(45deg);
-  background: linear-gradient(135deg, var(--accent-2), var(--accent));
-  border-radius: 2px;
-  box-shadow: 0 0 6px var(--accent-glow);
-  transition: background 0.2s ease, box-shadow 0.2s ease;
+.shrine-icon-row,
+.shrine-icon-title {
+  -webkit-mask-image: radial-gradient(circle closest-side, black 55%, transparent 100%);
+  mask-image: radial-gradient(circle closest-side, black 55%, transparent 100%);
 }
 
-tbody tr.is-found .shrine-name::before {
-  background: var(--ink-faint);
-  box-shadow: none;
+.shrine-icon-row {
+  width: 22px;
+  height: 22px;
+  margin-right: 0.4rem;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.shrine-icon-title {
+  width: 34px;
+  height: 34px;
+  vertical-align: middle;
 }
 
 .coord-tip-target {
@@ -618,13 +621,13 @@ tbody tr.is-found .shrine-name::before {
 .found-check:checked::after {
   content: '';
   position: absolute;
-  left: 50%;
-  top: 45%;
-  width: 6px;
-  height: 11px;
-  border: solid var(--surface);
-  border-width: 0 2px 2px 0;
-  transform: translate(-50%, -55%) rotate(45deg);
+  inset: -5px;
+  background-image: url('Assets/Totk%20Shrine%20Icon.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  -webkit-mask-image: radial-gradient(circle closest-side, black 55%, transparent 100%);
+  mask-image: radial-gradient(circle closest-side, black 55%, transparent 100%);
 }
 
 .empty-state {
@@ -686,13 +689,14 @@ footer.page a { color: var(--accent-2-strong); }
     <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"></path></svg>
     <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"></path></svg>
   </button>
-  <span class="version-tag">08.22.2026 v15</span>
+  <span class="version-tag">08.22.2026 v23</span>
 </div>
 <div class="wrap">
   <header class="page">
     <div class="titleblock">
       <div class="eyebrow">Tears of the Kingdom &middot; Shrine Reference</div>
       <div class="h1-row">
+        <img class="shrine-icon-title" src="Assets/Totk%20Shrine%20Icon.png" alt="" aria-hidden="true">
         <h1>Shrines of Hyrule</h1>
         <span class="theme-toggle-slot" id="themeToggleSlot"></span>
       </div>
@@ -961,18 +965,17 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
   });
 
   var COLUMNS = [
-    { key: 'found', label: 'Found' },
     { key: 'idx', label: '#' },
-    { key: 'tower', label: 'Skyview Tower' },
-    { key: 'region', label: 'Region' }
+    { key: 'found', label: 'Found' },
+    { key: 'region', label: 'Region' },
+    { key: 'tower', label: 'Skyview Tower' }
   ];
 
-  // Mobile-first: a column appears once the viewport is at least this wide,
-  // in ascending precedence (idx lowest, tower highest). Shrine and Found
-  // are always shown by default unless the user excludes them manually.
+  // Shrine, Found, Region, and Tower are always shown by default regardless
+  // of width; only the # column is hidden on narrow screens until the
+  // viewport reaches this width. Any of this can still be overridden
+  // manually via the Columns dialog.
   var AUTO_COL_BREAKPOINTS = {
-    region: 480,
-    tower: 560,
     idx: 640
   };
 
@@ -1012,7 +1015,7 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
   // visible set doesn't fit the viewport, the table grows wider and the
   // container scrolls horizontally instead of squeezing/overlapping content.
   var COLUMN_ORDER = ['idx', 'found', 'shrine', 'region', 'tower'];
-  var COLUMN_MIN_WIDTH = { idx: 58, found: 90, shrine: 165, region: 195, tower: 190 };
+  var COLUMN_MIN_WIDTH = { idx: 58, found: 90, shrine: 215, region: 195, tower: 190 };
 
   function applyColumnVisibility() {
     var effective = effectiveHiddenCols();
@@ -1174,7 +1177,13 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
       var tdShrine = document.createElement('td');
       tdShrine.className = 'shrine-name';
       tdShrine.setAttribute('data-col', 'shrine');
-      tdShrine.textContent = s.shrine;
+      var shrineIcon = document.createElement('img');
+      shrineIcon.className = 'shrine-icon-row';
+      shrineIcon.src = 'Assets/Totk%20Shrine%20Icon.png';
+      shrineIcon.alt = '';
+      shrineIcon.setAttribute('aria-hidden', 'true');
+      tdShrine.appendChild(shrineIcon);
+      tdShrine.appendChild(document.createTextNode(s.shrine));
       attachCoordTip(tdShrine, s.shrine_xyz);
       tdShrine.addEventListener('click', function () {
         if (suppressNextClick) return;
