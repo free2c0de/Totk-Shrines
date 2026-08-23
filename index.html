@@ -750,7 +750,7 @@ footer.page a { color: var(--accent-2-strong); }
     <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"></path></svg>
     <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"></path></svg>
   </button>
-  <span class="version-tag">08.22.2026 v31</span>
+  <span class="version-tag">08.22.2026 v32</span>
 </div>
 <div class="wrap">
   <header class="page">
@@ -1309,6 +1309,7 @@ var SHRINES_SEED = [{"region": "Akkala", "tower": "Ulri Mountain Skyview Tower",
       attachCoordTip(tdShrine, s.shrine_xyz);
       tdShrine.addEventListener('click', function () {
         if (suppressNextClick) return;
+        if (coordsModeActive) return;
         if (lockActive && cb.checked) return;
         cb.checked = !cb.checked;
         found[s.shrine] = cb.checked;
